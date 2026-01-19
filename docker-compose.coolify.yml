@@ -74,14 +74,14 @@ services:
       - backend
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       - backend
       - admin-frontend
       - student-frontend
-    volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.nginx-http.rule=Host(`${SERVICE_FQDN_NGINX}`)
