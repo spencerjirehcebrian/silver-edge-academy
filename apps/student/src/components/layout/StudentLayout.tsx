@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from './Header'
 import { FloatingNav } from './FloatingNav'
 import { GamificationAnimations } from '@/components/gamification/GamificationAnimations'
+import { LayoutErrorBoundary } from '@/components/error-boundaries/LayoutErrorBoundary'
 import { cn } from '@/utils/cn'
 
 export function StudentLayout() {
@@ -24,7 +25,9 @@ export function StudentLayout() {
         !isNavHidden && 'md:pl-36'
       )}>
         <div className="max-w-5xl mx-auto px-4 py-4 md:py-6">
-          <Outlet />
+          <LayoutErrorBoundary>
+            <Outlet />
+          </LayoutErrorBoundary>
         </div>
       </main>
 

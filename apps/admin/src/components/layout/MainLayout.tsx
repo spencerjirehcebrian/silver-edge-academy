@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { PageMetaProvider } from '@/contexts/PageMetaContext'
+import { LayoutErrorBoundary } from '@/components/error-boundaries/LayoutErrorBoundary'
 import { cn } from '@/utils/cn'
 
 export function MainLayout() {
@@ -20,7 +21,9 @@ export function MainLayout() {
         >
           <Header />
           <div className="p-6 animate-fade-in">
-            <Outlet />
+            <LayoutErrorBoundary>
+              <Outlet />
+            </LayoutErrorBoundary>
           </div>
         </main>
       </div>

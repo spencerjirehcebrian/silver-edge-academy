@@ -1,10 +1,8 @@
 import { Component, ReactNode } from 'react'
-import { AlertTriangle, Home, LogOut, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
+import { Frown, Home, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 import { classifyError, type ErrorInfo as SharedErrorInfo } from '@silveredge/shared'
 import { logError } from '@/utils/errorLogger'
 import { getRecoveryAction, handleAuthError, resetToHome } from '@/utils/errorRecovery'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 
 interface Props {
   children: ReactNode
@@ -18,7 +16,12 @@ interface State {
   showDetails: boolean
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+/**
+ * Root-level error boundary for the student app
+ * Catches all component render errors (not router errors)
+ * Features crystal glass styling with violet/coral colors and friendly messages
+ */
+export class RootErrorBoundary extends Component<Props, State> {
   state: State = {
     hasError: false,
     error: null,
@@ -73,52 +76,64 @@ export class ErrorBoundary extends Component<Props, State> {
       const isDev = import.meta.env.DEV
 
       return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-          <Card className="max-w-2xl w-full shadow-lg" padding="lg">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-violet-500/10 via-violet-400/5 to-coral-500/10">
+          <div className="max-w-2xl w-full crystal-glass rounded-2xl p-8 shadow-2xl crystal-shimmer">
             <div className="flex flex-col items-center text-center">
-              {/* Error Icon */}
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
-                <AlertTriangle className="h-8 w-8 text-indigo-600" />
+              {/* Friendly Error Icon */}
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 crystal-refract">
+                <Frown className="h-10 w-10 text-white" />
               </div>
 
-              {/* Error Title */}
-              <h1 className="text-2xl font-semibold text-slate-900 mb-2">
-                Something Went Wrong
+              {/* Friendly Title */}
+              <h1 className="text-3xl font-display font-bold text-slate-800 mb-3">
+                Oops! Something went a bit wonky!
               </h1>
 
-              {/* Error Message */}
-              <p className="text-slate-600 mb-6 max-w-md">
+              {/* Friendly Message */}
+              <p className="text-slate-600 mb-8 max-w-md text-lg">
                 {errorClassification?.message ||
-                  'An unexpected error occurred. Please try reloading the page.'}
+                  "Don&apos;t worry, these things happen! Let&apos;s get you back on track."}
               </p>
 
               {/* Recovery Actions */}
               <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-                <Button
-                  variant="primary"
+                <button
                   onClick={this.handleReload}
-                  icon={<RefreshCw className="h-4 w-4" />}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 text-white font-medium hover:from-violet-600 hover:to-violet-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 min-h-[44px]"
                 >
-                  Reload Page
-                </Button>
+                  <RefreshCw className="h-5 w-5" />
+                  Try Again
+                </button>
 
-                <Button variant="secondary" onClick={this.handleGoHome} icon={<Home className="h-4 w-4" />}>
-                  Go to Dashboard
-                </Button>
+                <button
+                  onClick={this.handleGoHome}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-coral-500 to-coral-600 text-white font-medium hover:from-coral-600 hover:to-coral-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 min-h-[44px]"
+                >
+                  <Home className="h-5 w-5" />
+                  Go Home
+                </button>
 
                 {errorClassification?.requiresAuth && (
-                  <Button variant="ghost" onClick={this.handleLogout} icon={<LogOut className="h-4 w-4" />}>
+                  <button
+                    onClick={this.handleLogout}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl crystal-glass text-slate-700 font-medium hover:bg-white/50 transition-all min-h-[44px]"
+                  >
                     Logout
-                  </Button>
+                  </button>
                 )}
               </div>
 
+              {/* Encouraging Message */}
+              <p className="text-sm text-slate-500 italic">
+                You&apos;re doing great! Everyone hits a bump in the road sometimes.
+              </p>
+
               {/* Dev Mode: Error Details */}
               {isDev && error && (
-                <div className="w-full mt-6 border-t border-slate-200 pt-6">
+                <div className="w-full mt-8 border-t border-slate-200/50 pt-6">
                   <button
                     onClick={this.toggleDetails}
-                    className="flex items-center justify-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 mx-auto mb-4"
+                    className="flex items-center justify-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 mx-auto mb-4 transition-colors"
                   >
                     {showDetails ? (
                       <>
@@ -128,7 +143,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     ) : (
                       <>
                         <ChevronDown className="h-4 w-4" />
-                        Show Error Details
+                        Show Error Details (Dev Mode)
                       </>
                     )}
                   </button>
@@ -137,7 +152,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     <div className="text-left space-y-4">
                       {/* Error Classification */}
                       {errorClassification && (
-                        <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="crystal-glass rounded-xl p-4">
                           <h3 className="text-sm font-semibold text-slate-900 mb-2">
                             Error Classification
                           </h3>
@@ -161,14 +176,14 @@ export class ErrorBoundary extends Component<Props, State> {
                       )}
 
                       {/* Error Message */}
-                      <div className="bg-red-50 rounded-lg p-4">
+                      <div className="bg-red-50 rounded-xl p-4 border border-red-200">
                         <h3 className="text-sm font-semibold text-red-900 mb-2">Error Message</h3>
                         <p className="text-xs text-red-800 font-mono">{error.message}</p>
                       </div>
 
                       {/* Stack Trace */}
                       {error.stack && (
-                        <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="crystal-glass rounded-xl p-4">
                           <h3 className="text-sm font-semibold text-slate-900 mb-2">Stack Trace</h3>
                           <pre className="text-xs text-slate-700 font-mono overflow-x-auto whitespace-pre-wrap break-all">
                             {error.stack}
@@ -178,7 +193,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
                       {/* Component Stack */}
                       {errorInfo?.componentStack && (
-                        <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="crystal-glass rounded-xl p-4">
                           <h3 className="text-sm font-semibold text-slate-900 mb-2">
                             Component Stack
                           </h3>
@@ -192,7 +207,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </div>
               )}
             </div>
-          </Card>
+          </div>
         </div>
       )
     }

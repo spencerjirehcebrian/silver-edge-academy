@@ -1,8 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { lazy } from 'react'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { AdminOnlyRoute } from '@/components/auth/AdminOnlyRoute'
+import { AsyncBoundary } from '@/components/error-boundaries/AsyncBoundary'
 
 // Lazy load pages
 const Login = lazy(() => import('@/pages/Auth/Login'))
@@ -43,37 +44,37 @@ function PageLoader() {
   )
 }
 
-// Wrap lazy components with Suspense
+// Wrap lazy components with AsyncBoundary (includes Suspense + error handling)
 function withSuspense(Component: React.LazyExoticComponent<() => JSX.Element>) {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AsyncBoundary fallback={<PageLoader />}>
       <Component />
-    </Suspense>
+    </AsyncBoundary>
   )
 }
 
 // Type-aware wrappers for UserCreate
 function TeacherCreate() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AsyncBoundary fallback={<PageLoader />}>
       <UserCreate type="teacher" />
-    </Suspense>
+    </AsyncBoundary>
   )
 }
 
 function ParentCreate() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AsyncBoundary fallback={<PageLoader />}>
       <UserCreate type="parent" />
-    </Suspense>
+    </AsyncBoundary>
   )
 }
 
 function StudentCreate() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AsyncBoundary fallback={<PageLoader />}>
       <UserCreate type="student" />
-    </Suspense>
+    </AsyncBoundary>
   )
 }
 

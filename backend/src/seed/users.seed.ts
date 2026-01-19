@@ -55,16 +55,16 @@ export async function seedUsers(): Promise<SeededUsers> {
   // Create students
   const students: Types.ObjectId[] = []
   const studentData = [
-    { username: 'alex_coder', displayName: 'Alex Thompson', level: 5, xp: 450 },
-    { username: 'emma_dev', displayName: 'Emma Wilson', level: 3, xp: 220 },
-    { username: 'liam_js', displayName: 'Liam Brown', level: 7, xp: 680 },
-    { username: 'olivia_py', displayName: 'Olivia Davis', level: 2, xp: 120 },
-    { username: 'noah_code', displayName: 'Noah Martinez', level: 4, xp: 350 },
-    { username: 'ava_tech', displayName: 'Ava Garcia', level: 6, xp: 580 },
-    { username: 'william_dev', displayName: 'William Rodriguez', level: 1, xp: 50 },
-    { username: 'sophia_js', displayName: 'Sophia Anderson', level: 8, xp: 820 },
-    { username: 'james_py', displayName: 'James Taylor', level: 3, xp: 280 },
-    { username: 'isabella_code', displayName: 'Isabella Thomas', level: 5, xp: 490 },
+    { username: 'alex_coder', displayName: 'Alex Thompson', level: 5, xp: 450, theme: 'system' as const, fontSize: 14 },
+    { username: 'emma_dev', displayName: 'Emma Wilson', level: 3, xp: 220, theme: 'light' as const, fontSize: 16 },
+    { username: 'liam_js', displayName: 'Liam Brown', level: 7, xp: 680, theme: 'light' as const, fontSize: 14 },
+    { username: 'olivia_py', displayName: 'Olivia Davis', level: 2, xp: 120, theme: 'light' as const, fontSize: 16 },
+    { username: 'noah_code', displayName: 'Noah Martinez', level: 4, xp: 350, theme: 'dark' as const, fontSize: 14 },
+    { username: 'ava_tech', displayName: 'Ava Garcia', level: 6, xp: 580, theme: 'light' as const, fontSize: 12 },
+    { username: 'william_dev', displayName: 'William Rodriguez', level: 1, xp: 50, theme: 'system' as const, fontSize: 16 },
+    { username: 'sophia_js', displayName: 'Sophia Anderson', level: 8, xp: 820, theme: 'dark' as const, fontSize: 14 },
+    { username: 'james_py', displayName: 'James Taylor', level: 3, xp: 280, theme: 'dark' as const, fontSize: 14 },
+    { username: 'isabella_code', displayName: 'Isabella Thomas', level: 5, xp: 490, theme: 'light' as const, fontSize: 14 },
   ]
 
   for (const data of studentData) {
@@ -82,10 +82,14 @@ export async function seedUsers(): Promise<SeededUsers> {
       totalXp: data.xp,
       currencyBalance: data.xp * 10,
       currentStreakDays: Math.floor(Math.random() * 7),
+      preferences: {
+        theme: data.theme,
+        fontSize: data.fontSize,
+      },
     })
     students.push(student._id)
   }
-  logger.info(`Created ${students.length} students`)
+  logger.info(`Created ${students.length} students with preferences`)
 
   // Create parent
   const parent = await User.create({

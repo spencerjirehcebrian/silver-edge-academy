@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { asyncHandler } from '../../utils/asyncHandler'
-import { sendSuccess, sendCreated, sendNoContent } from '../../utils/ApiResponse'
+import { sendNoContent } from '../../utils/ApiResponse'
 import type { AuthenticatedRequest } from '../../middleware/auth'
 import * as sandboxService from './sandbox.service'
 import type {

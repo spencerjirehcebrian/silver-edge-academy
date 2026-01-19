@@ -5,6 +5,7 @@ import { router } from '@/routes'
 import { SidebarProvider } from '@/contexts/SidebarContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
+import { logQueryError } from '@/utils/errorLogger'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,9 +14,18 @@ const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 30, // 30 minutes
       retry: 1,
       refetchOnWindowFocus: false,
+      // Log query errors for monitoring
+      throwOnError: (error, query) => {
+        logQueryError(error as Error, { queryKey: [...query.queryKey] })
+        return false
+      },
     },
     mutations: {
       retry: 0,
+      // Log mutation errors for monitoring
+      onError: (error) => {
+        console.error('[Mutation Error]', error)
+      },
     },
   },
 })

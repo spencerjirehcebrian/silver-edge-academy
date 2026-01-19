@@ -28,7 +28,6 @@ import type {
   SubmitQuizInput,
   EquipItemInput,
   XpHistoryQuery,
-  PaginationQuery,
 } from './student.schema'
 import { parsePaginationParams, buildPaginationMeta } from '../../utils/pagination'
 
@@ -469,7 +468,7 @@ export async function getStudentCourseMap(userId: string, courseId: string): Pro
   let totalCompleted = 0
   let totalLessons = 0
 
-  const sectionsData: typeof sections extends (infer T)[]
+  const sectionsData: typeof sections extends (infer _T)[]
     ? {
         id: string
         title: string
