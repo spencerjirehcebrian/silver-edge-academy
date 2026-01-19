@@ -32,7 +32,8 @@ export function useEquipItem() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (itemId: string) => shopApi.equipItem(itemId),
+    mutationFn: ({ itemId, slot }: { itemId: string; slot: 'avatar' | 'uiTheme' | 'editorTheme' }) =>
+      shopApi.equipItem(itemId, slot),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: ['profile'] })

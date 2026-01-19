@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { SkeletonCourseCard } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import type { CourseListItem } from '@/services/api/courses'
 
 export default function CourseList() {
   const { data: courses, isLoading, error } = useCourses()
@@ -45,7 +46,7 @@ export default function CourseList() {
       <h1 className="text-2xl font-bold text-slate-800">My Courses</h1>
 
       <div className="grid gap-4">
-        {courses.map((course) => (
+        {courses.map((course: CourseListItem) => (
           <Link key={course.id} to={`/courses/${course.id}`}>
             <Card interactive padding="lg">
               <div className="flex items-start justify-between mb-3">

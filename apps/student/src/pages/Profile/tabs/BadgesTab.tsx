@@ -1,10 +1,10 @@
 import { Star, Flame, Trophy, Lock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/Skeleton'
-import type { Badge } from '@silveredge/shared'
+import type { StudentBadge } from '@/services/api/gamification'
 
 interface BadgesTabProps {
-  earned: Badge[]
-  locked: Badge[]
+  earned: StudentBadge[]
+  locked: StudentBadge[]
   isLoading: boolean
   totalEarned: number
   totalAvailable: number

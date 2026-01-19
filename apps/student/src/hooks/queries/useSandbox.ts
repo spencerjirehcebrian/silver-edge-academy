@@ -5,7 +5,7 @@ import type { SandboxProject } from '@/types/student'
 export function useSandboxProjects() {
   return useQuery({
     queryKey: ['sandbox-projects'],
-    queryFn: sandboxApi.getSandboxProjects,
+    queryFn: () => sandboxApi.getSandboxProjects(),
   })
 }
 

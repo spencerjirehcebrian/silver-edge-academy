@@ -62,7 +62,7 @@ export default function NotificationsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {data.notifications.map((notification) => (
+          {data.notifications.map((notification: StudentNotification) => (
             <NotificationCard
               key={notification.id}
               notification={notification}

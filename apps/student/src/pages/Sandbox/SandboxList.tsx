@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatDistanceToNow } from 'date-fns'
+import type { SandboxProject } from '@/types/student'
 
 export default function SandboxList() {
   const { data, isLoading, error } = useSandboxProjects()
@@ -113,7 +114,7 @@ export default function SandboxList() {
         />
       ) : (
         <div className="grid gap-4">
-          {data.projects.map((project) => (
+          {data.projects.map((project: SandboxProject) => (
             <Card key={project.id} interactive padding="md">
               <Link to={`/sandbox/${project.id}`} className="block">
                 <div className="flex items-start justify-between">

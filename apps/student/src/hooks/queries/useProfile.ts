@@ -4,7 +4,7 @@ import * as profileApi from '@/services/api/profile'
 export function useProfile() {
   return useQuery({
     queryKey: ['profile'],
-    queryFn: profileApi.getProfile,
+    queryFn: () => profileApi.getProfile(),
   })
 }
 
@@ -30,7 +30,7 @@ export function useUpdateProfile() {
 export function useNotifications() {
   return useQuery({
     queryKey: ['notifications'],
-    queryFn: profileApi.getNotifications,
+    queryFn: () => profileApi.getNotifications(),
   })
 }
 

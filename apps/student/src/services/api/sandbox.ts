@@ -7,13 +7,13 @@ import type { SandboxProject } from '@/types/student'
 // ============================================================================
 
 export interface SandboxListResponse {
-  data: SandboxProject[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+  projects: SandboxProject[]
+  count: number
+  maxProjects: number
+}
+
+export interface SandboxProjectResponse {
+  project: SandboxProject
 }
 
 export interface CreateSandboxProjectInput {
@@ -50,8 +50,8 @@ export async function getSandboxProjects(params?: {
 /**
  * Get a sandbox project by ID
  */
-export async function getSandboxProject(projectId: string): Promise<SandboxProject> {
-  return api.get<SandboxProject>(STUDENT_ENDPOINTS.sandbox.detail(projectId))
+export async function getSandboxProject(projectId: string): Promise<SandboxProjectResponse> {
+  return api.get<SandboxProjectResponse>(STUDENT_ENDPOINTS.sandbox.detail(projectId), { unwrapData: false })
 }
 
 /**

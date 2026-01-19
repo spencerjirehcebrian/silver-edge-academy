@@ -7,13 +7,12 @@ import type { StudentHelpRequest } from '@/types/student'
 // ============================================================================
 
 export interface HelpRequestsListResponse {
-  data: StudentHelpRequest[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+  requests: StudentHelpRequest[]
+  hasPending: boolean
+}
+
+export interface HelpRequestResponse {
+  request: StudentHelpRequest
 }
 
 export interface CreateHelpRequestInput {
@@ -44,8 +43,8 @@ export async function getHelpRequests(params?: {
 /**
  * Get a help request by ID
  */
-export async function getHelpRequest(requestId: string): Promise<StudentHelpRequest> {
-  return api.get<StudentHelpRequest>(STUDENT_ENDPOINTS.helpRequests.detail(requestId))
+export async function getHelpRequest(requestId: string): Promise<HelpRequestResponse> {
+  return api.get<HelpRequestResponse>(STUDENT_ENDPOINTS.helpRequests.detail(requestId), { unwrapData: false })
 }
 
 /**

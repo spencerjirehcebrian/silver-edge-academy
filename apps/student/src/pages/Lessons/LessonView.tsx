@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/utils/cn'
+import type { LessonStep } from '@/types/student'
 
 export default function LessonView() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>()
@@ -94,7 +95,7 @@ export default function LessonView() {
 
       {/* Progress */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {lesson.steps.map((step, index) => {
+        {lesson.steps.map((step: LessonStep, index: number) => {
           const Icon = step.type === 'content' ? BookOpen :
                        step.type === 'exercise' ? Code :
                        FileQuestion

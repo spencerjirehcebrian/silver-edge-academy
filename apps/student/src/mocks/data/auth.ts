@@ -57,6 +57,7 @@ export const mockStudents: (StudentAuthUser & { password: string })[] = [
     username: 'newbie',
     password: 'student123',
     displayName: 'New Student',
+    email: 'newbie@example.com',
     role: 'student',
     avatarId: null,
     status: 'active',

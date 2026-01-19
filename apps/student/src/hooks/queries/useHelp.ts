@@ -4,7 +4,7 @@ import * as helpApi from '@/services/api/help'
 export function useHelpRequests() {
   return useQuery({
     queryKey: ['help-requests'],
-    queryFn: helpApi.getHelpRequests,
+    queryFn: () => helpApi.getHelpRequests(),
   })
 }
 

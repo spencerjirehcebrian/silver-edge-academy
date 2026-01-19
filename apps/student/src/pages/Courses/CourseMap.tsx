@@ -6,6 +6,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { WindingPath } from '@/components/course/WindingPath'
 import { cn } from '@/utils/cn'
+import type { StudentSection } from '@/types/student'
 
 export default function CourseMap() {
   const { courseId } = useParams<{ courseId: string }>()
@@ -73,7 +74,7 @@ export default function CourseMap() {
 
       {/* Sections with Winding Paths */}
       <div className="space-y-8">
-        {course.sections.map((section, sectionIndex) => (
+        {course.sections.map((section: StudentSection, sectionIndex: number) => (
           <div key={section.id} className="bg-white rounded-2xl border border-slate-200 p-6">
             {/* Section header */}
             <div className="flex items-center justify-between mb-6">

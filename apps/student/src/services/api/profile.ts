@@ -1,10 +1,23 @@
 import { api } from './client'
 import { STUDENT_ENDPOINTS } from './endpoints'
 import type { StudentAuthUser, StudentNotification } from '@/types/student'
+import type { Badge } from '@silveredge/shared'
 
 // ============================================================================
 // Types
 // ============================================================================
+
+export interface ProfileResponse {
+  profile: StudentAuthUser
+  stats: {
+    lessonsCompleted: number
+    exercisesPassed: number
+    quizzesPassed: number
+    badgesEarned: number
+  }
+  recentBadges: Badge[]
+  equippedItems: Record<string, string>
+}
 
 export interface UpdateProfileInput {
   displayName?: string
@@ -18,12 +31,6 @@ export interface UpdateProfileInput {
 
 export interface NotificationsResponse {
   notifications: StudentNotification[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
   unreadCount: number
 }
 
@@ -34,8 +41,8 @@ export interface NotificationsResponse {
 /**
  * Get student profile
  */
-export async function getProfile(): Promise<StudentAuthUser> {
-  return api.get<StudentAuthUser>(STUDENT_ENDPOINTS.profile)
+export async function getProfile(): Promise<ProfileResponse> {
+  return api.get<ProfileResponse>(STUDENT_ENDPOINTS.profile, { unwrapData: false })
 }
 
 /**

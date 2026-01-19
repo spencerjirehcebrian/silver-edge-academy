@@ -1,19 +1,21 @@
 import { api } from './client'
 import { STUDENT_ENDPOINTS } from './endpoints'
+import type { Badge } from '@silveredge/shared'
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface StudentBadge {
-  id: string
-  name: string
-  description: string
-  iconUrl: string
-  category: string
-  xpRequired?: number
+export type StudentBadge = Badge & {
   isEarned: boolean
   earnedAt?: string
+}
+
+export interface BadgesResponse {
+  earned: StudentBadge[]
+  locked: StudentBadge[]
+  totalEarned: number
+  totalAvailable: number
 }
 
 export interface XpHistoryItem {
@@ -26,13 +28,7 @@ export interface XpHistoryItem {
 }
 
 export interface XpHistoryResponse {
-  data: XpHistoryItem[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+  history: XpHistoryItem[]
 }
 
 // ============================================================================
@@ -42,8 +38,8 @@ export interface XpHistoryResponse {
 /**
  * Get all badges with earned status
  */
-export async function getBadges(): Promise<StudentBadge[]> {
-  return api.get<StudentBadge[]>(STUDENT_ENDPOINTS.badges)
+export async function getBadges(): Promise<BadgesResponse> {
+  return api.get<BadgesResponse>(STUDENT_ENDPOINTS.badges, { unwrapData: false })
 }
 
 /**
@@ -56,6 +52,6 @@ export async function getXpHistory(params?: {
 }): Promise<XpHistoryResponse> {
   return api.get<XpHistoryResponse>(STUDENT_ENDPOINTS.xpHistory, {
     params,
-    unwrapData: false, // Keep the full response with meta
+    unwrapData: false,
   })
 }

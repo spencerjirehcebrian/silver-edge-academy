@@ -60,7 +60,7 @@ export default function HelpRequestsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {data.requests.map((request) => (
+          {data.requests.map((request: StudentHelpRequest) => (
             <HelpRequestCard key={request.id} request={request} />
           ))}
         </div>

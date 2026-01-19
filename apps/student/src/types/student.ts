@@ -20,6 +20,11 @@ export interface StudentAuthUser {
     editorTheme?: string
     fontSize?: number
   }
+  emailVerified?: boolean
+  parentIds?: string[]
+  lastActivityDate?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface StudentLoginCredentials {
@@ -181,7 +186,7 @@ export interface StudentQuiz {
   xpReward: number
   maxAttempts: number
   currentAttempt: number
-  questions: QuizQuestion[]
+  questions?: QuizQuestion[]
 }
 
 export interface QuizSubmitResult {
