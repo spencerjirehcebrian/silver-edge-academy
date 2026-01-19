@@ -3,6 +3,10 @@ FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
+# Build argument for API URL (defaults to relative path for reverse proxy)
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy root workspace files and all workspaces (Bun requires all declared workspaces to exist)
 COPY package.json bun.lock* ./
 COPY packages ./packages
