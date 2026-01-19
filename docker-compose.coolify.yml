@@ -3,9 +3,10 @@
 #
 # Coolify Setup:
 # 1. Coolify automatically creates a network for all services in this stack
-# 2. Configure domain in Coolify UI - it handles Traefik labels and TLS automatically
-# 3. Set the domain to point to the nginx service (port 80)
-# 4. Configure environment variables in Coolify UI
+# 2. When prompted for domains:
+#    - MongoDB, MinIO, Backend, Admin/Student Frontends: SKIP or leave empty (internal only)
+#    - Nginx: Configure your domain (e.g., yourdomain.com) - this is the ONLY public service
+# 3. Configure environment variables in Coolify UI
 
 name: silveredge-coolify
 
@@ -14,15 +15,11 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: always
-    ports: []
-    # Internal service - no public access needed
 
   minio:
     volumes:
       - minio_data:/data
     restart: always
-    ports: []
-    # Internal service - no public access needed
 
   backend:
     build:
@@ -31,33 +28,25 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-    ports: []
-    # Internal service - accessed via nginx reverse proxy
 
   admin-frontend:
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
     restart: always
-    ports: []
-    # Internal service - served via nginx reverse proxy
 
   student-frontend:
     build:
       context: .
       dockerfile: apps/student/Dockerfile
     restart: always
-    ports: []
-    # Internal service - served via nginx reverse proxy
 
   nginx:
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
     restart: always
     ports:
-      - "80:80"
-    # This is the ONLY service that should have a domain configured in Coolify
-    # Configure domain in Coolify UI for this service
+      - "80"
 
 volumes:
   mongodb_data:
