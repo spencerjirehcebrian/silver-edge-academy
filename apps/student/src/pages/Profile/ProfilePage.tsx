@@ -126,11 +126,11 @@ export default function ProfilePage() {
         {/* Badges Tab */}
         <TabsContent value="badges">
           <BadgesTab
-            earned={badgesData?.earned || []}
-            locked={badgesData?.locked || []}
+            earned={badgesData?.filter(b => b.isEarned) || []}
+            locked={badgesData?.filter(b => !b.isEarned) || []}
             isLoading={badgesLoading}
-            totalEarned={badgesData?.totalEarned || 0}
-            totalAvailable={badgesData?.totalAvailable || 0}
+            totalEarned={badgesData?.filter(b => b.isEarned).length || 0}
+            totalAvailable={badgesData?.length || 0}
           />
         </TabsContent>
 

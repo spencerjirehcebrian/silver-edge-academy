@@ -36,11 +36,13 @@ export default function HelpRequestsPage() {
     )
   }
 
+  const hasPending = data?.some(req => req.status === 'pending')
+
   return (
     <div className="space-y-4 animate-fade-in">
       <h1 className="text-2xl font-bold text-slate-800">Help Requests</h1>
 
-      {data?.hasPending && (
+      {hasPending && (
         <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
           <div className="flex items-center gap-2 text-amber-700">
             <Clock className="w-5 h-5" />
@@ -52,7 +54,7 @@ export default function HelpRequestsPage() {
         </div>
       )}
 
-      {!data?.requests.length ? (
+      {!data?.length ? (
         <EmptyState
           icon={<HelpCircle className="w-8 h-8" />}
           title="No help requests"
@@ -60,7 +62,7 @@ export default function HelpRequestsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {data.requests.map((request: StudentHelpRequest) => (
+          {data.map((request: StudentHelpRequest) => (
             <HelpRequestCard key={request.id} request={request} />
           ))}
         </div>

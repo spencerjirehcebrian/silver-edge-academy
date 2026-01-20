@@ -38,7 +38,7 @@ export default function QuizView() {
     )
   }
 
-  if (error || !data) {
+  if (error || !data || !data.questions) {
     return (
       <div className="text-center py-12">
         <p className="text-red-500">Failed to load quiz</p>
@@ -52,7 +52,8 @@ export default function QuizView() {
     )
   }
 
-  const { quiz, questions } = data
+  const quiz = data
+  const questions = data.questions
   const currentQuestion = questions[currentQuestionIndex]
   const selectedAnswer = answers.get(currentQuestion?.id)
   const isLastQuestion = currentQuestionIndex === questions.length - 1
