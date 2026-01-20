@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/Input'
 import { StatusBadge } from '@/components/ui/Badge'
 import { FormSection } from '@/components/forms/FormSection'
 import { FormField } from '@/components/forms/FormField'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useUpdateShopItem, useDeleteShopItem, useToggleShopItemStatus } from '@/hooks/queries/useShop'
 import { formatDate } from '@/utils/formatters'
 import type { ShopItem } from '@/services/api/shop'
@@ -87,7 +87,7 @@ export function ShopItemDetailPanel({
   const updateItem = useUpdateShopItem()
   const deleteItem = useDeleteShopItem()
   const toggleStatus = useToggleShopItemStatus()
-  const { confirm, Dialog: ConfirmDialogEl } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   useEffect(() => {
     if (item) {
@@ -427,7 +427,7 @@ export function ShopItemDetailPanel({
           </div>
         )}
       </SlideOverPanel>
-      {ConfirmDialogEl}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </>
   )
 }

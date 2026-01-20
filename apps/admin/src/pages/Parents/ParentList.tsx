@@ -25,7 +25,7 @@ export default function ParentList() {
 
   const debouncedSearch = useDebounce(urlState.search, 300)
   const deleteUser = useDeleteUser()
-  const { confirm, Dialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Use sorting helper hook
   const { sorted, onSort } = useSortHelper(urlState, setUrlState)
@@ -82,7 +82,7 @@ export default function ParentList() {
       emptyMessage="No parents found"
       emptyIcon={Heart}
       emptyDescription="Add parents to connect them with their children and monitor their learning progress."
-      confirmDialog={Dialog}
+      dialogProps={dialogProps}
     />
   )
 }

@@ -6,6 +6,7 @@ import {
   useStorageInfo,
 } from '@/hooks/queries/useSettings'
 import type { SystemSettings as SystemSettingsType } from '@/services/api/settings'
+import { formatBytes } from '@/utils/formatters'
 
 export default function System() {
   const { data: settings, isLoading: settingsLoading } = useSystemSettings()
@@ -312,7 +313,7 @@ export default function System() {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-slate-600">
-                {storage?.used.toFixed(1)} GB used of {storage?.total} GB
+                {storage ? `${formatBytes(storage.used)} used of ${formatBytes(storage.total)}` : 'Loading...'}
               </span>
               <span className="text-sm font-medium text-slate-800">{storagePercentage}%</span>
             </div>
@@ -326,19 +327,19 @@ export default function System() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-3 bg-slate-50 rounded-lg">
               <p className="text-lg font-bold text-slate-800">
-                {storage?.breakdown.lessonMedia.toFixed(1)} GB
+                {storage ? formatBytes(storage.breakdown.lessonMedia) : '0 Bytes'}
               </p>
               <p className="text-xs text-slate-500">Lesson Media</p>
             </div>
             <div className="p-3 bg-slate-50 rounded-lg">
               <p className="text-lg font-bold text-slate-800">
-                {storage?.breakdown.sandbox.toFixed(1)} GB
+                {storage ? formatBytes(storage.breakdown.sandbox) : '0 Bytes'}
               </p>
               <p className="text-xs text-slate-500">Sandbox</p>
             </div>
             <div className="p-3 bg-slate-50 rounded-lg">
               <p className="text-lg font-bold text-slate-800">
-                {storage?.breakdown.database.toFixed(1)} GB
+                {storage ? formatBytes(storage.breakdown.database) : '0 Bytes'}
               </p>
               <p className="text-xs text-slate-500">Database</p>
             </div>

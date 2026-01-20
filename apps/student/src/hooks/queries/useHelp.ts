@@ -11,7 +11,7 @@ export function useHelpRequests() {
 export function useHelpRequest(requestId: string | undefined) {
   return useQuery({
     queryKey: ['help-request', requestId],
-    queryFn: () => helpApi.getHelpRequest(requestId!).then((res) => res.request),
+    queryFn: () => helpApi.getHelpRequest(requestId!),
     enabled: !!requestId,
   })
 }

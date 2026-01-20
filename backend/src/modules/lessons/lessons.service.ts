@@ -29,7 +29,7 @@ export async function getLessonById(sectionId: string, lessonId: string) {
   return {
     ...lesson.toJSON(),
     exercises: exercises.map((e) => e.toJSON()),
-    quiz: quiz?.toJSON() || null,
+    quiz: quiz?.questions || [],
   }
 }
 

@@ -4,7 +4,7 @@ import * as coursesApi from '@/services/api/courses'
 export function useExercise(exerciseId: string | undefined) {
   return useQuery({
     queryKey: ['exercise', exerciseId],
-    queryFn: () => coursesApi.getExercise(exerciseId!).then((res) => res.exercise),
+    queryFn: () => coursesApi.getExercise(exerciseId!),
     enabled: !!exerciseId,
   })
 }

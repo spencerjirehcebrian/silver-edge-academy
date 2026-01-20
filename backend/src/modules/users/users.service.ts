@@ -60,61 +60,13 @@ export async function listUsers(query: ListUsersQuery): Promise<UserListResult> 
   }
 }
 
-export async function getUserById(id: string): Promise<Record<string, unknown>> {
+export async function getUserById(id: string): Promise<IUser> {
   const user = await User.findById(id)
   if (!user) {
     throw ApiError.notFound('User')
   }
 
-  const userData = user.toJSON()
-
-  // Add profile data for students
-  if (user.role === 'student') {
-    const profile = await StudentProfile.findOne({ userId: user._id })
-    if (profile) {
-      const classDoc = profile.classId ? await Class.findById(profile.classId) : null
-      return {
-        ...userData,
-        totalXp: profile.totalXp,
-        currentLevel: profile.currentLevel,
-        currencyBalance: profile.currencyBalance,
-        currentStreakDays: profile.currentStreakDays,
-        lastActivityDate: profile.lastActivityDate?.toISOString(),
-        classId: profile.classId?.toString(),
-        className: classDoc?.name,
-        parentIds: profile.parentIds?.map((p) => p.toString()) || [],
-        preferences: profile.preferences,
-      }
-    }
-  }
-
-  // Add profile data for parents
-  if (user.role === 'parent') {
-    const profile = await ParentProfile.findOne({ userId: user._id })
-    if (profile) {
-      const children = await User.find({ _id: { $in: profile.childIds } })
-      return {
-        ...userData,
-        childIds: profile.childIds?.map((c) => c.toString()) || [],
-        childNames: children.map((c) => c.displayName),
-      }
-    }
-  }
-
-  // Add profile data for teachers
-  if (user.role === 'teacher') {
-    const classes = await Class.find({ teacherIds: user._id })
-    const classIds = classes.map((c) => c._id.toString())
-    const studentCount = classes.reduce((sum, c) => sum + (c.studentIds?.length || 0), 0)
-    return {
-      ...userData,
-      classIds,
-      classCount: classes.length,
-      studentCount,
-    }
-  }
-
-  return userData
+  return user
 }
 
 export async function createUser(input: CreateUserInput): Promise<IUser> {
@@ -357,13 +309,22 @@ export async function getStudentAchievements(userId: string) {
     }
   })
 
+  const xpHistory = (profile.xpHistory || [])
+    .slice(0, 20)
+    .map(entry => ({
+      date: entry.earnedAt.toISOString(),
+      xp: entry.amount,
+      source: entry.source,
+    }))
+
   return {
     badges: earnedBadges,
     totalXp: profile.totalXp,
-    currentLevel: profile.currentLevel,
+    level: profile.currentLevel,
     currencyBalance: profile.currencyBalance,
     currentStreakDays: profile.currentStreakDays,
     longestStreak: profile.longestStreak,
+    xpHistory,
   }
 }
 
@@ -375,18 +336,57 @@ export async function getStudentCourses(userId: string) {
   }
 
   const profile = await StudentProfile.findOne({ userId: new Types.ObjectId(userId) })
-  if (!profile || !profile.classId) {
-    return []
-  }
+  if (!profile || !profile.classId) return []
 
-  const studentClass = await Class.findById(profile.classId).populate('courseIds')
-  if (!studentClass) {
-    return []
-  }
+  const studentClass = await Class.findById(profile.classId)
+  if (!studentClass || !studentClass.courseIds.length) return []
 
   const { Course } = await import('../courses/courses.model')
-  const courses = await Course.find({ _id: { $in: studentClass.courseIds } })
-  return courses
+  const { Section } = await import('../sections/sections.model')
+  const { Lesson } = await import('../lessons/lessons.model')
+  const { LessonProgress } = await import('../progress/lessonProgress.model')
+
+  const courses = await Course.find({ _id: { $in: studentClass.courseIds } }).lean()
+  const allLessonProgress = await LessonProgress.find({ studentId: new Types.ObjectId(userId) }).lean()
+  const progressMap = new Map(allLessonProgress.map(p => [p.lessonId.toString(), p]))
+
+  const studentCourses = await Promise.all(courses.map(async (course) => {
+    const sections = await Section.find({ courseId: course._id }).lean()
+    const lessons = await Lesson.find({
+      sectionId: { $in: sections.map(s => s._id) },
+      status: 'published'
+    }).lean()
+
+    const totalLessons = lessons.length
+    const completedLessons = lessons.filter(l =>
+      progressMap.get(l._id.toString())?.status === 'completed'
+    ).length
+
+    const lessonIds = lessons.map(l => l._id.toString())
+    const relevantProgress = allLessonProgress.filter(p => lessonIds.includes(p.lessonId.toString()))
+
+    let lastAccessed: string | null = null
+    if (relevantProgress.length > 0) {
+      const mostRecent = relevantProgress.reduce((latest, current) => {
+        const currentDate = current.updatedAt || current.createdAt
+        const latestDate = latest.updatedAt || latest.createdAt
+        return currentDate > latestDate ? current : latest
+      })
+      lastAccessed = (mostRecent.updatedAt || mostRecent.createdAt).toISOString()
+    }
+
+    return {
+      id: course._id.toString(),
+      title: course.title,
+      language: course.language,
+      lessonsCompleted: completedLessons,
+      totalLessons,
+      progress: totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
+      lastAccessed,
+    }
+  }))
+
+  return studentCourses
 }
 
 // Link parent to student

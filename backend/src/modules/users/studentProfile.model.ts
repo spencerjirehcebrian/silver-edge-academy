@@ -13,6 +13,12 @@ export interface IStudentProfile extends Document {
   currentStreakDays: number
   longestStreak: number
   lastActivityDate?: Date
+  xpHistory: Array<{
+    amount: number
+    source: string
+    sourceId?: Types.ObjectId
+    earnedAt: Date
+  }>
   preferences: {
     theme?: 'light' | 'dark' | 'system'
     editorTheme?: string
@@ -33,6 +39,13 @@ const studentProfileSchema = new Schema<IStudentProfile>(
     currentStreakDays: { type: Number, default: 0, min: 0 },
     longestStreak: { type: Number, default: 0, min: 0 },
     lastActivityDate: Date,
+    xpHistory: [{
+      amount: { type: Number, required: true },
+      source: { type: String, required: true },
+      sourceId: { type: Schema.Types.ObjectId },
+      earnedAt: { type: Date, default: Date.now },
+      _id: false
+    }],
     preferences: {
       theme: { type: String, enum: ['light', 'dark', 'system'] },
       editorTheme: String,
@@ -48,5 +61,6 @@ const studentProfileSchema = new Schema<IStudentProfile>(
 studentProfileSchema.index({ classId: 1 })
 studentProfileSchema.index({ currentLevel: -1 })
 studentProfileSchema.index({ totalXp: -1 })
+studentProfileSchema.index({ 'xpHistory.earnedAt': -1 })
 
 export const StudentProfile = model<IStudentProfile>('StudentProfile', studentProfileSchema)

@@ -150,6 +150,62 @@ export async function seedShop(adminId: Types.ObjectId): Promise<void> {
       isPermanent: true,
       createdBy: adminId,
     },
+
+    // Teacher Rewards
+    {
+      name: 'Starbucks Gift Card ($25)',
+      description: 'Treat yourself to premium coffee and snacks',
+      category: 'teacher_reward' as const,
+      price: 2500,
+      isActive: true,
+      isPermanent: false,
+      createdBy: adminId,
+    },
+    {
+      name: 'Amazon Gift Card ($50)',
+      description: 'Get whatever you need from the world\'s largest store',
+      category: 'teacher_reward' as const,
+      price: 5000,
+      isActive: true,
+      isPermanent: false,
+      createdBy: adminId,
+    },
+    {
+      name: 'Professional Development Course',
+      description: 'Access to premium online teaching courses',
+      category: 'teacher_reward' as const,
+      price: 8000,
+      isActive: true,
+      isPermanent: true,
+      createdBy: adminId,
+    },
+    {
+      name: 'Classroom Supplies Voucher',
+      description: 'Stock up on essential classroom materials',
+      category: 'teacher_reward' as const,
+      price: 3000,
+      isActive: true,
+      isPermanent: false,
+      createdBy: adminId,
+    },
+    {
+      name: 'Tech Gadget Voucher',
+      description: 'Upgrade your teaching tech setup',
+      category: 'teacher_reward' as const,
+      price: 10000,
+      isActive: true,
+      isPermanent: false,
+      createdBy: adminId,
+    },
+    {
+      name: 'Spa & Wellness Package',
+      description: 'Relax and recharge with a wellness day',
+      category: 'teacher_reward' as const,
+      price: 6000,
+      isActive: true,
+      isPermanent: false,
+      createdBy: adminId,
+    },
   ]
 
   await ShopItem.insertMany(shopItems)

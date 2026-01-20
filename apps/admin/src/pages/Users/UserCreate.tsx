@@ -150,6 +150,7 @@ export default function UserCreate({ type: initialType }: { type?: UserRole }) {
               <Input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Min. 8 characters"
                 value={formData.password}
                 onChange={(e) => handleChange('password', e.target.value)}
@@ -160,6 +161,7 @@ export default function UserCreate({ type: initialType }: { type?: UserRole }) {
               <Input
                 id="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Re-enter password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}

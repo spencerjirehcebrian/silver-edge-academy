@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { Award } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -25,7 +26,7 @@ export default function BadgeCreate() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const gradients = badgeColorGradients[formData.color]
-  const IconComponent = iconMap[formData.icon]
+  const IconComponent = iconMap[formData.icon] || Award
   const selectedTrigger = triggerOptions.find((t) => t.value === formData.triggerType)
 
   const handleChange = (field: string, value: string | number) => {
@@ -96,7 +97,7 @@ export default function BadgeCreate() {
           <FormField label="Icon">
             <div className="grid grid-cols-8 gap-2">
               {iconList.map((icon) => {
-                const Icon = iconMap[icon]
+                const Icon = iconMap[icon] || Award
                 return (
                   <button
                     key={icon}

@@ -216,6 +216,10 @@ export interface Class {
   status: ClassStatus
   createdAt: string
   updatedAt: string
+  // Computed fields (returned by backend but not stored in DB)
+  attendanceRate?: number
+  avgProgress?: number
+  lastActivity?: string
 }
 
 export interface ClassWithDetails extends Class {

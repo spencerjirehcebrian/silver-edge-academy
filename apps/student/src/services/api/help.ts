@@ -6,14 +6,9 @@ import type { StudentHelpRequest } from '@/types/student'
 // Types
 // ============================================================================
 
-export interface HelpRequestsListResponse {
-  requests: StudentHelpRequest[]
-  hasPending: boolean
-}
-
-export interface HelpRequestResponse {
-  request: StudentHelpRequest
-}
+// Backend returns array directly (unwrapped by API client)
+export type HelpRequestsListResponse = StudentHelpRequest[]
+export type HelpRequestResponse = StudentHelpRequest
 
 export interface CreateHelpRequestInput {
   lessonId: string
@@ -34,17 +29,14 @@ export async function getHelpRequests(params?: {
   limit?: number
   status?: 'pending' | 'in_progress' | 'resolved' | 'closed'
 }): Promise<HelpRequestsListResponse> {
-  return api.get<HelpRequestsListResponse>(STUDENT_ENDPOINTS.helpRequests.list, {
-    params,
-    unwrapData: false,
-  })
+  return api.get<HelpRequestsListResponse>(STUDENT_ENDPOINTS.helpRequests.list, { params })
 }
 
 /**
  * Get a help request by ID
  */
 export async function getHelpRequest(requestId: string): Promise<HelpRequestResponse> {
-  return api.get<HelpRequestResponse>(STUDENT_ENDPOINTS.helpRequests.detail(requestId), { unwrapData: false })
+  return api.get<HelpRequestResponse>(STUDENT_ENDPOINTS.helpRequests.detail(requestId))
 }
 
 /**

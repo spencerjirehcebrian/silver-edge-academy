@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Modal } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Avatar'
 import { FormSection } from '@/components/forms/FormSection'
@@ -84,9 +84,17 @@ export default function BadgeList() {
   const { data: badges, isLoading } = useBadges()
   const createBadge = useCreateBadge()
   const deleteBadge = useDeleteBadge()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
-  const selection = useSelection<Badge>(badges || [])
+  const selection = useSelection<Badge>([])
+
+  // Clear selection when badges data changes
+  useEffect(() => {
+    if (badges) {
+      selection.clearSelection()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [badges])
 
   // Use bulk delete hook
   const { handleBulkDelete, isDeleting } = useBulkDelete<Badge>({
@@ -99,7 +107,7 @@ export default function BadgeList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [earnedModalBadgeId, setEarnedModalBadgeId] = useState<string | null>(null)
 
-  const selectedBadgeForModal = badges?.find((b) => b.id === earnedModalBadgeId)
+  const selectedBadgeForModal = badges?.find((b) => b.id === earnedModalBadgeId) || null
   const { data: earnedStudents, isLoading: isLoadingEarned } = useBadgeEarnedStudents(earnedModalBadgeId || '')
   const [formData, setFormData] = useState({
     name: '',
@@ -114,7 +122,7 @@ export default function BadgeList() {
 
   const selectedTrigger = triggerOptions.find((t) => t.value === formData.triggerType)
   const gradients = badgeColorGradients[formData.color]
-  const IconComponent = iconMap[formData.icon]
+  const IconComponent = iconMap[formData.icon] || Award
 
   const handleChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -167,7 +175,7 @@ export default function BadgeList() {
 
   return (
     <div>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -184,7 +192,7 @@ export default function BadgeList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {badges?.map((badge) => {
-            const BadgeIcon = iconMap[badge.icon]
+            const BadgeIcon = iconMap[badge.icon] || Award
             const isSelected = selection.isSelected(badge.id)
 
             return (
@@ -370,7 +378,7 @@ export default function BadgeList() {
               <FormSection title="Icon">
                 <div className="grid grid-cols-8 gap-2">
                   {iconList.map((icon) => {
-                    const Icon = iconMap[icon]
+                    const Icon = iconMap[icon] || Award
                     return (
                       <button
                         key={icon}

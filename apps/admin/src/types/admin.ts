@@ -20,6 +20,7 @@ import type {
   BadgeTriggerType,
   User,
   DashboardStats as SharedDashboardStats,
+  ActivityData,
 } from '@silveredge/shared'
 
 // ============================================================================
@@ -29,15 +30,8 @@ import type {
 
 export type DashboardStats = SharedDashboardStats
 
-/**
- * Admin-specific activity data format.
- * Different from shared ActivityData (which has per-activity-type counts).
- * This simplified format is used for charts in the admin dashboard.
- */
-export interface ActivityData {
-  day: string
-  value: number
-}
+// Re-export ActivityData from shared types
+export type { ActivityData }
 
 export interface RecentItem {
   id: string
@@ -176,7 +170,6 @@ export interface AdminCourse extends Course {
 // ============================================================================
 
 export interface AdminClass extends Class {
-  term: string
   teacherEmail?: string
   avgProgress: number
   attendanceRate: number

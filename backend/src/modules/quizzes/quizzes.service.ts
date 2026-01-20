@@ -1,10 +1,10 @@
 import { Types } from 'mongoose'
 import { Quiz, type IQuiz } from './quizzes.model'
 import { QuizSubmission } from '../progress/quizSubmission.model'
-import { StudentProfile } from '../users/studentProfile.model'
 import { Lesson } from '../lessons/lessons.model'
 import { ApiError } from '../../utils/ApiError'
 import type { CreateQuizInput, UpdateQuizInput, SubmitQuizInput } from './quizzes.schema'
+import { awardXp } from '../../utils/xpTracking'
 
 export async function listQuizzes(lessonId: string): Promise<IQuiz[]> {
   return Quiz.find({ lessonId: new Types.ObjectId(lessonId) })
@@ -120,10 +120,12 @@ export async function submitQuiz(quizId: string, studentId: string, input: Submi
 
   // Update student profile if XP earned
   if (xpEarned > 0) {
-    await StudentProfile.findOneAndUpdate(
-      { userId: new Types.ObjectId(studentId) },
-      { $inc: { totalXp: xpEarned } }
-    )
+    await awardXp({
+      studentId,
+      amount: xpEarned,
+      source: `Passed Quiz: ${quiz.title}`,
+      sourceId: quizId,
+    })
   }
 
   return {

@@ -7,6 +7,7 @@ import {
   createClassSchema,
   updateClassSchema,
   listClassesQuerySchema,
+  listStudentsQuerySchema,
   idParamSchema,
   addStudentSchema,
   addCourseSchema,
@@ -55,6 +56,7 @@ router.get(
   authenticate,
   authorize(['admin', 'teacher']),
   validateParams(idParamSchema),
+  validateQuery(listStudentsQuerySchema),
   controller.getStudents
 )
 

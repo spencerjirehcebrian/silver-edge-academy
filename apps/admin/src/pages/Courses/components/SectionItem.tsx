@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DragHandle } from '@/components/ui/DragDrop'
 import { Tooltip } from '@/components/ui/Tooltip'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useDeleteSection } from '@/hooks/queries/useCourses'
 import type { CourseSection } from '@/services/api/courses'
 import { SectionForm } from './SectionForm'
@@ -19,7 +19,7 @@ interface SectionItemProps {
 export function SectionItem({ courseId, section, index }: SectionItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
   const deleteSection = useDeleteSection()
 
   const {
@@ -66,7 +66,7 @@ export function SectionItem({ courseId, section, index }: SectionItemProps) {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div
         ref={setNodeRef}
         style={style}

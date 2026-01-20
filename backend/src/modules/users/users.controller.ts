@@ -2,6 +2,7 @@ import type { Response } from 'express'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { sendSuccess, sendPaginated, sendCreated, sendNoContent } from '../../utils/ApiResponse'
 import * as usersService from './users.service'
+import { serializeUsers, serializeUser } from './users.serializer'
 import type {
   CreateUserInput,
   UpdateUserInput,
@@ -15,7 +16,8 @@ export const list = asyncHandler(async (
   res: Response
 ) => {
   const result = await usersService.listUsers(req.query)
-  sendPaginated(res, result.users.map((u) => u.toJSON()), result.meta)
+  const serializedUsers = await serializeUsers(result.users)
+  sendPaginated(res, serializedUsers, result.meta)
 })
 
 export const getById = asyncHandler(async (
@@ -23,7 +25,8 @@ export const getById = asyncHandler(async (
   res: Response
 ) => {
   const user = await usersService.getUserById(req.params.id)
-  sendSuccess(res, user)
+  const serializedUser = await serializeUser(user)
+  sendSuccess(res, serializedUser)
 })
 
 export const create = asyncHandler(async (
@@ -31,7 +34,8 @@ export const create = asyncHandler(async (
   res: Response
 ) => {
   const user = await usersService.createUser(req.body)
-  sendCreated(res, user.toJSON())
+  const serializedUser = await serializeUser(user)
+  sendCreated(res, serializedUser)
 })
 
 export const update = asyncHandler(async (
@@ -39,7 +43,8 @@ export const update = asyncHandler(async (
   res: Response
 ) => {
   const user = await usersService.updateUser(req.params.id, req.body)
-  sendSuccess(res, user.toJSON())
+  const serializedUser = await serializeUser(user)
+  sendSuccess(res, serializedUser)
 })
 
 export const remove = asyncHandler(async (
@@ -95,7 +100,7 @@ export const getCourses = asyncHandler(async (
   res: Response
 ) => {
   const courses = await usersService.getStudentCourses(req.params.id)
-  sendSuccess(res, courses.map((c) => c.toJSON()))
+  sendSuccess(res, courses)
 })
 
 export const linkParent = asyncHandler(async (

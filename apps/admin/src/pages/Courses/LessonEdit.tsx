@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'
 import { Modal } from '@/components/ui/Modal'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useLesson, useUpdateLesson } from '@/hooks/queries/useCourses'
 import type { LessonExercise, LessonQuizQuestion } from '@/services/api/courses'
 import { formatDate } from '@/utils/formatters'
@@ -60,7 +60,7 @@ export default function LessonEdit() {
   } | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { confirm, Dialog: ConfirmDialogComponent } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Helper to insert markdown syntax at cursor position
   const insertMarkdown = useCallback((prefix: string, suffix: string = '') => {
@@ -871,7 +871,7 @@ export default function LessonEdit() {
         </div>
       </Modal>
 
-      {ConfirmDialogComponent}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </div>
   )
 }

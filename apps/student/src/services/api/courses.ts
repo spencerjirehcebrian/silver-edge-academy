@@ -25,26 +25,13 @@ export interface CourseListItem {
   isAssigned?: boolean
 }
 
-export interface CoursesListResponse {
-  courses: CourseListItem[]
-}
-
-export interface CourseMapResponse {
-  course: StudentCourseMap
-}
-
-export interface LessonResponse {
-  lesson: LessonContent
-}
-
-export interface ExerciseResponse {
-  exercise: StudentExercise
-}
-
-export interface QuizResponse {
-  quiz: StudentQuiz
-  questions: QuizQuestion[]
-}
+// Note: Backend returns data directly (unwrapped by API client),
+// not wrapped in additional { courses: ... }, { course: ... }, etc.
+export type CoursesListResponse = CourseListItem[]
+export type CourseMapResponse = StudentCourseMap
+export type LessonResponse = LessonContent
+export type ExerciseResponse = StudentExercise
+export type QuizResponse = StudentQuiz // Quiz includes questions embedded
 
 // ============================================================================
 // Courses
@@ -54,14 +41,14 @@ export interface QuizResponse {
  * Get list of enrolled courses with progress
  */
 export async function getCourses(): Promise<CoursesListResponse> {
-  return api.get<CoursesListResponse>(STUDENT_ENDPOINTS.courses.list, { unwrapData: false })
+  return api.get<CoursesListResponse>(STUDENT_ENDPOINTS.courses.list)
 }
 
 /**
  * Get course map with sections and lessons
  */
 export async function getCourseMap(courseId: string): Promise<CourseMapResponse> {
-  return api.get<CourseMapResponse>(STUDENT_ENDPOINTS.courses.detail(courseId), { unwrapData: false })
+  return api.get<CourseMapResponse>(STUDENT_ENDPOINTS.courses.detail(courseId))
 }
 
 // ============================================================================
@@ -72,7 +59,7 @@ export async function getCourseMap(courseId: string): Promise<CourseMapResponse>
  * Get lesson content
  */
 export async function getLesson(lessonId: string): Promise<LessonResponse> {
-  return api.get<LessonResponse>(STUDENT_ENDPOINTS.lessons.detail(lessonId), { unwrapData: false })
+  return api.get<LessonResponse>(STUDENT_ENDPOINTS.lessons.detail(lessonId))
 }
 
 /**
@@ -90,7 +77,7 @@ export async function completeLesson(lessonId: string): Promise<{ xpEarned: numb
  * Get exercise details
  */
 export async function getExercise(exerciseId: string): Promise<ExerciseResponse> {
-  return api.get<ExerciseResponse>(STUDENT_ENDPOINTS.exercises.detail(exerciseId), { unwrapData: false })
+  return api.get<ExerciseResponse>(STUDENT_ENDPOINTS.exercises.detail(exerciseId))
 }
 
 /**
@@ -108,7 +95,7 @@ export async function submitExercise(exerciseId: string, code: string): Promise<
  * Get quiz with questions
  */
 export async function getQuiz(quizId: string): Promise<QuizResponse> {
-  return api.get<QuizResponse>(STUDENT_ENDPOINTS.quizzes.detail(quizId), { unwrapData: false })
+  return api.get<QuizResponse>(STUDENT_ENDPOINTS.quizzes.detail(quizId))
 }
 
 /**

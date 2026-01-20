@@ -5,7 +5,7 @@ import { SearchInput } from '@/components/ui/SearchInput'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Checkbox } from '@/components/ui/Checkbox'
 import {
   Table,
@@ -26,7 +26,7 @@ import { useUrlState } from '@/hooks/useUrlState'
 import { useSelection } from '@/hooks/useSelection'
 import { useSortHelper } from '@/hooks/useSortHelper'
 import { useBulkDelete } from '@/hooks/useBulkDelete'
-import { CLASS_STATUS_OPTIONS, CLASS_TERMS } from '@/constants/filterOptions'
+import { CLASS_STATUS_OPTIONS } from '@/constants/filterOptions'
 import type { Class } from '@/services/api/classes'
 
 type ViewMode = 'table' | 'grid'
@@ -49,7 +49,20 @@ function getColorClasses(color: string) {
 }
 
 function getClassInitials(name: string) {
-  return name.replace('Class ', '')
+  // Remove common prefixes like "Class", "Grade", "Section"
+  const cleanName = name.replace(/^(Class|Grade|Section)\s+/i, '')
+
+  // Split by spaces and get first letter of each word
+  const words = cleanName.trim().split(/\s+/)
+
+  // Take first letter of up to 3 words, uppercase
+  const initials = words
+    .slice(0, 3)
+    .map(word => word.charAt(0).toUpperCase())
+    .join('')
+
+  // If we got no initials (empty name), return first 2 chars of original name
+  return initials || name.slice(0, 2).toUpperCase()
 }
 
 export default function ClassList() {
@@ -58,7 +71,6 @@ export default function ClassList() {
     search: '',
     page: 1,
     status: '',
-    term: '',
     sortBy: 'name',
     sortOrder: 'asc' as 'asc' | 'desc',
   })
@@ -72,7 +84,7 @@ export default function ClassList() {
 
   const debouncedSearch = useDebounce(urlState.search, 300)
   const deleteClass = useDeleteClass()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Use sorting helper hook
   const { sorted, onSort } = useSortHelper(urlState, setUrlState)
@@ -82,7 +94,6 @@ export default function ClassList() {
     limit: pageSize,
     search: debouncedSearch,
     status: (urlState.status as 'active' | 'archived' | 'draft') || undefined,
-    term: urlState.term || undefined,
     sortBy: urlState.sortBy || undefined,
     sortOrder: urlState.sortOrder as 'asc' | 'desc',
   })
@@ -93,7 +104,7 @@ export default function ClassList() {
   useEffect(() => {
     selection.clearSelection()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, urlState.status, urlState.term])
+  }, [debouncedSearch, urlState.status])
 
   // Persist view mode to localStorage
   useEffect(() => {
@@ -122,7 +133,7 @@ export default function ClassList() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
@@ -141,17 +152,6 @@ export default function ClassList() {
               {CLASS_STATUS_OPTIONS.map((opt) => (
                 <option key={opt.id} value={opt.id}>
                   {opt.name}
-                </option>
-              ))}
-            </Select>
-            <Select
-              value={urlState.term}
-              onChange={(e) => setUrlState({ term: e.target.value, page: 1 })}
-              className="w-56"
-            >
-              {CLASS_TERMS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
                 </option>
               ))}
             </Select>
@@ -366,25 +366,25 @@ function ClassTable({ data, sorted, onSort, selection, onRowClick }: ClassTableP
                       <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            cls.avgProgress >= 80
+                            (cls.avgProgress || 0) >= 80
                               ? 'bg-emerald-500'
-                              : cls.avgProgress >= 50
+                              : (cls.avgProgress || 0) >= 50
                                 ? 'bg-amber-500'
                                 : 'bg-slate-300'
                           }`}
-                          style={{ width: `${cls.avgProgress}%` }}
+                          style={{ width: `${cls.avgProgress || 0}%` }}
                         />
                       </div>
                       <span
                         className={`text-sm font-medium ${
-                          cls.avgProgress >= 80
+                          (cls.avgProgress || 0) >= 80
                             ? 'text-emerald-600'
-                            : cls.avgProgress > 0
+                            : (cls.avgProgress || 0) > 0
                               ? 'text-slate-700'
                               : 'text-slate-400'
                         }`}
                       >
-                        {cls.avgProgress}%
+                        {cls.avgProgress !== undefined && cls.avgProgress !== null ? `${cls.avgProgress}%` : 'N/A'}
                       </span>
                     </div>
                   </TableCell>
@@ -499,25 +499,25 @@ function ClassGrid({ data, selection, onCardClick }: ClassGridProps) {
               <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${
-                    cls.avgProgress >= 80
+                    (cls.avgProgress || 0) >= 80
                       ? 'bg-emerald-500'
-                      : cls.avgProgress >= 50
+                      : (cls.avgProgress || 0) >= 50
                         ? 'bg-amber-500'
                         : 'bg-slate-300'
                   }`}
-                  style={{ width: `${cls.avgProgress}%` }}
+                  style={{ width: `${cls.avgProgress || 0}%` }}
                 />
               </div>
               <span
                 className={`text-sm font-medium ${
-                  cls.avgProgress >= 80
+                  (cls.avgProgress || 0) >= 80
                     ? 'text-emerald-600'
-                    : cls.avgProgress > 0
+                    : (cls.avgProgress || 0) > 0
                       ? 'text-slate-700'
                       : 'text-slate-400'
                 }`}
               >
-                {cls.avgProgress}%
+                {cls.avgProgress !== undefined && cls.avgProgress !== null ? `${cls.avgProgress}%` : 'N/A'}
               </span>
             </div>
 

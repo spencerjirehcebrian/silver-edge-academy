@@ -43,6 +43,13 @@ export const API_ENDPOINTS = {
     removeStudent: (classId: string, studentId: string) => `/classes/${classId}/students/${studentId}`,
   },
 
+  // Attendance
+  attendance: {
+    list: (classId: string) => `/classes/${classId}/attendance`,
+    mark: (classId: string) => `/classes/${classId}/attendance`,
+    summary: (classId: string) => `/classes/${classId}/attendance/summary`,
+  },
+
   // Courses
   courses: {
     list: '/courses',

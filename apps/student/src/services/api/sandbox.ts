@@ -6,15 +6,9 @@ import type { SandboxProject } from '@/types/student'
 // Types
 // ============================================================================
 
-export interface SandboxListResponse {
-  projects: SandboxProject[]
-  count: number
-  maxProjects: number
-}
-
-export interface SandboxProjectResponse {
-  project: SandboxProject
-}
+// Backend returns array directly (unwrapped by API client)
+export type SandboxListResponse = SandboxProject[]
+export type SandboxProjectResponse = SandboxProject
 
 export interface CreateSandboxProjectInput {
   name: string
@@ -41,17 +35,14 @@ export async function getSandboxProjects(params?: {
   limit?: number
   language?: 'javascript' | 'python'
 }): Promise<SandboxListResponse> {
-  return api.get<SandboxListResponse>(STUDENT_ENDPOINTS.sandbox.list, {
-    params,
-    unwrapData: false,
-  })
+  return api.get<SandboxListResponse>(STUDENT_ENDPOINTS.sandbox.list, { params })
 }
 
 /**
  * Get a sandbox project by ID
  */
 export async function getSandboxProject(projectId: string): Promise<SandboxProjectResponse> {
-  return api.get<SandboxProjectResponse>(STUDENT_ENDPOINTS.sandbox.detail(projectId), { unwrapData: false })
+  return api.get<SandboxProjectResponse>(STUDENT_ENDPOINTS.sandbox.detail(projectId))
 }
 
 /**

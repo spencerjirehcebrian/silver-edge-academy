@@ -114,21 +114,21 @@ export function useConfirmDialog() {
     resolveRef.current = null
   }, [])
 
-  const DialogComponent = options ? (
-    <ConfirmDialog
-      isOpen={isOpen}
-      onClose={handleClose}
-      onConfirm={handleConfirm}
-      title={options.title}
-      message={options.message}
-      confirmLabel={options.confirmLabel}
-      cancelLabel={options.cancelLabel}
-      variant={options.variant}
-    />
-  ) : null
+  const dialogProps: ConfirmDialogProps | null = options
+    ? {
+        isOpen,
+        onClose: handleClose,
+        onConfirm: handleConfirm,
+        title: options.title,
+        message: options.message,
+        confirmLabel: options.confirmLabel,
+        cancelLabel: options.cancelLabel,
+        variant: options.variant,
+      }
+    : null
 
   return {
     confirm,
-    Dialog: DialogComponent,
+    dialogProps,
   }
 }

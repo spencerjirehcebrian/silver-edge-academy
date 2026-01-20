@@ -6,7 +6,7 @@ import { FormField } from '@/components/forms/FormField'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCourse, useUpdateCourse, useDeleteCourse } from '@/hooks/queries/useCourses'
 import { formatDate } from '@/utils/formatters'
 
@@ -16,7 +16,7 @@ export default function CourseEdit() {
   const { data: course, isLoading } = useCourse(id || '')
   const updateCourse = useUpdateCourse()
   const deleteCourse = useDeleteCourse()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const [formData, setFormData] = useState({
     title: '',
@@ -107,7 +107,7 @@ export default function CourseEdit() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       {/* Course Details */}
       <FormSection title="Course Details">

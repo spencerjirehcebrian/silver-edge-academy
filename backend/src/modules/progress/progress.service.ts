@@ -8,6 +8,7 @@ import { Section } from '../sections/sections.model'
 import { Course } from '../courses/courses.model'
 import { Class } from '../classes/classes.model'
 import { ApiError } from '../../utils/ApiError'
+import { awardXp } from '../../utils/xpTracking'
 
 export interface ProgressSummary {
   totalLessons: number
@@ -189,13 +190,12 @@ export async function completeLesson(lessonId: string, studentId: string) {
   }
 
   // Update student XP
-  await StudentProfile.findOneAndUpdate(
-    { userId: new Types.ObjectId(studentId) },
-    {
-      $inc: { totalXp: lesson.xpReward },
-      lastActivityDate: new Date(),
-    }
-  )
+  await awardXp({
+    studentId,
+    amount: lesson.xpReward,
+    source: `Completed Lesson: ${lesson.title}`,
+    sourceId: lessonId,
+  })
 
   return { progress, xpEarned: lesson.xpReward }
 }

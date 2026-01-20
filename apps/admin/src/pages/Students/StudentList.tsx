@@ -27,7 +27,7 @@ export default function StudentList() {
 
   const debouncedSearch = useDebounce(urlState.search, 300)
   const deleteUser = useDeleteUser()
-  const { confirm, Dialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Use sorting helper hook
   const { sorted, onSort } = useSortHelper(urlState, setUrlState)
@@ -97,7 +97,7 @@ export default function StudentList() {
           className: 'w-40',
         },
       ]}
-      confirmDialog={Dialog}
+      dialogProps={dialogProps}
     />
   )
 }

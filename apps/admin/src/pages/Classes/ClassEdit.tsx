@@ -9,7 +9,7 @@ import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useClass, useUpdateClass, useArchiveClass, useDeleteClass } from '@/hooks/queries/useClasses'
 import { useToast } from '@/contexts/ToastContext'
 import { formatDate } from '@/utils/formatters'
@@ -31,7 +31,7 @@ export default function ClassEdit() {
   const archiveClass = useArchiveClass()
   const deleteClass = useDeleteClass()
   const { addToast } = useToast()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -254,7 +254,7 @@ export default function ClassEdit() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
         {/* Class Details */}
         <FormSection title="Class Details">
@@ -304,23 +304,22 @@ export default function ClassEdit() {
         </FormField>
       </FormSection>
 
-      {/* Academic Term (Read-only) */}
-      <FormSection
-        title="Academic Term"
-        description="Term cannot be changed after students are enrolled."
-      >
-        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-          <Calendar className="w-5 h-5 text-slate-400" />
-          <div>
-            <p className="font-medium text-slate-700">{cls.term}</p>
-            {cls.startDate && cls.endDate && (
+      {/* Schedule (Read-only) */}
+      {cls.startDate && cls.endDate && (
+        <FormSection
+          title="Schedule"
+          description="Class schedule dates."
+        >
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+            <Calendar className="w-5 h-5 text-slate-400" />
+            <div>
               <p className="text-sm text-slate-500">
                 {formatDate(cls.startDate)} - {formatDate(cls.endDate)}
               </p>
-            )}
+            </div>
           </div>
-        </div>
-      </FormSection>
+        </FormSection>
+      )}
 
       {/* Teacher Assignment */}
       <FormSection title="Teacher Assignment">

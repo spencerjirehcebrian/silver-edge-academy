@@ -5,7 +5,7 @@ import { SearchInput } from '@/components/ui/SearchInput'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import {
   Table,
   TableHeader,
@@ -54,7 +54,7 @@ export default function CourseList() {
 
   const debouncedSearch = useDebounce(urlState.search, 300)
   const deleteCourse = useDeleteCourse()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Use the shared sorting helper hook
   const { sorted, onSort } = useSortHelper(urlState, setUrlState)
@@ -69,7 +69,7 @@ export default function CourseList() {
     sortOrder: urlState.sortOrder as 'asc' | 'desc',
   })
 
-  const selection = useSelection<Course>(data?.data || [])
+  const selection = useSelection<Course>([])
 
   // Clear selection when filters change
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function CourseList() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4">

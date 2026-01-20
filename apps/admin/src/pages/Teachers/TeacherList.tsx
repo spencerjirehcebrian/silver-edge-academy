@@ -25,7 +25,7 @@ export default function TeacherList() {
 
   const debouncedSearch = useDebounce(urlState.search, 300)
   const deleteUser = useDeleteUser()
-  const { confirm, Dialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   // Use sorting helper hook
   const { sorted, onSort } = useSortHelper(urlState, setUrlState)
@@ -82,7 +82,7 @@ export default function TeacherList() {
       emptyMessage="No teachers found"
       emptyIcon={Users}
       emptyDescription="Add teachers to manage classes and create courses for students."
-      confirmDialog={Dialog}
+      dialogProps={dialogProps}
     />
   )
 }

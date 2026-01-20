@@ -25,14 +25,17 @@ const colors = [
 ]
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(' ')
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase()
-  }
+  const trimmed = name?.trim()
+  if (!trimmed) return '??'
+
+  const parts = trimmed.split(' ')
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 function getColorIndex(name: string): number {
+  if (!name) return 0
+
   let hash = 0
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash)

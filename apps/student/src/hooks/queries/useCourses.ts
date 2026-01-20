@@ -4,14 +4,14 @@ import * as coursesApi from '@/services/api/courses'
 export function useCourses() {
   return useQuery({
     queryKey: ['courses'],
-    queryFn: () => coursesApi.getCourses().then((res) => res.courses),
+    queryFn: () => coursesApi.getCourses(),
   })
 }
 
 export function useCourseMap(courseId: string | undefined) {
   return useQuery({
     queryKey: ['course', courseId],
-    queryFn: () => coursesApi.getCourseMap(courseId!).then((res) => res.course),
+    queryFn: () => coursesApi.getCourseMap(courseId!),
     enabled: !!courseId,
   })
 }
@@ -19,7 +19,7 @@ export function useCourseMap(courseId: string | undefined) {
 export function useLesson(lessonId: string | undefined) {
   return useQuery({
     queryKey: ['lesson', lessonId],
-    queryFn: () => coursesApi.getLesson(lessonId!).then((res) => res.lesson),
+    queryFn: () => coursesApi.getLesson(lessonId!),
     enabled: !!lessonId,
   })
 }

@@ -29,7 +29,6 @@ export default function ClassCreate() {
     name: '',
     description: '',
     color: '#6366f1',
-    term: '',
     startDate: '',
     endDate: '',
     teacherId: '',
@@ -47,14 +46,6 @@ export default function ClassCreate() {
     },
   })
 
-  const { data: termsData } = useQuery({
-    queryKey: ['terms'],
-    queryFn: async () => {
-      const res = await fetch('/api/terms')
-      return res.json()
-    },
-  })
-
   const { data: coursesData } = useQuery({
     queryKey: ['courses', 'available'],
     queryFn: async () => {
@@ -64,7 +55,6 @@ export default function ClassCreate() {
   })
 
   const teachers = teachersData?.data || []
-  const terms = termsData?.data || []
   const courses = coursesData?.data || []
 
   const handleChange = (field: string, value: string | string[]) => {
@@ -94,9 +84,6 @@ export default function ClassCreate() {
     const newErrors: Record<string, string> = {}
     if (!formData.name.trim()) {
       newErrors.name = 'Class name is required'
-    }
-    if (!formData.term) {
-      newErrors.term = 'Term is required'
     }
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
       newErrors.endDate = 'End date must be after start date'
@@ -170,23 +157,8 @@ export default function ClassCreate() {
         </FormField>
       </FormSection>
 
-      {/* Term & Schedule */}
-      <FormSection title="Term & Schedule" description="Set the academic term for this class.">
-        <FormField label="Academic Term" required error={errors.term}>
-          <Select
-            value={formData.term}
-            onChange={(e) => handleChange('term', e.target.value)}
-            error={!!errors.term}
-          >
-            <option value="">Select term...</option>
-            {terms.map((term: { id: string; name: string }) => (
-              <option key={term.id} value={term.name}>
-                {term.name}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-
+      {/* Schedule */}
+      <FormSection title="Schedule" description="Set the class schedule dates (optional).">
         <FormRow>
           <FormField label="Start Date">
             <Input

@@ -6,14 +6,20 @@ import type { StudentShopItem, PurchaseResult } from '@/types/student'
  * Get shop items with ownership status
  */
 export async function getShopItems(): Promise<StudentShopItem[]> {
-  return api.get<StudentShopItem[]>(STUDENT_ENDPOINTS.shop.items)
+  const { items } = await api.get<{ items: StudentShopItem[] }>(
+    STUDENT_ENDPOINTS.shop.items
+  )
+  return items
 }
 
 /**
  * Get owned items (inventory)
  */
 export async function getInventory(): Promise<StudentShopItem[]> {
-  return api.get<StudentShopItem[]>(STUDENT_ENDPOINTS.shop.inventory)
+  const { items } = await api.get<{ items: StudentShopItem[] }>(
+    STUDENT_ENDPOINTS.shop.inventory
+  )
+  return items
 }
 
 /**

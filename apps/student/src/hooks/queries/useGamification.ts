@@ -11,6 +11,6 @@ export function useBadges() {
 export function useXpHistory() {
   return useQuery({
     queryKey: ['xp-history'],
-    queryFn: () => gamificationApi.getXpHistory().then((res) => res.history),
+    queryFn: () => gamificationApi.getXpHistory().then((res) => res.data),
   })
 }

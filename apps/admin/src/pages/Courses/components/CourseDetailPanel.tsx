@@ -7,7 +7,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { StatusBadge } from '@/components/ui/Badge'
 import { FormSection } from '@/components/forms/FormSection'
 import { FormField } from '@/components/forms/FormField'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useUpdateCourse, useDeleteCourse, usePublishCourse } from '@/hooks/queries/useCourses'
 import { formatDate } from '@/utils/formatters'
 import type { Course } from '@/services/api/courses'
@@ -39,7 +39,7 @@ export function CourseDetailPanel({
   const updateCourse = useUpdateCourse()
   const deleteCourse = useDeleteCourse()
   const publishCourse = usePublishCourse()
-  const { confirm, Dialog: ConfirmDialogEl } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   useEffect(() => {
     if (course) {
@@ -405,7 +405,7 @@ export function CourseDetailPanel({
           </div>
         )}
       </SlideOverPanel>
-      {ConfirmDialogEl}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </>
   )
 }

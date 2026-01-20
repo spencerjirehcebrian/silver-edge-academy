@@ -7,7 +7,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { StatusBadge, RoleBadge } from '@/components/ui/Badge'
 import { FormSection } from '@/components/forms/FormSection'
 import { FormField, FormRow } from '@/components/forms/FormField'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { formatDate, formatNumber } from '@/utils/formatters'
 import {
   useUpdateUser,
@@ -41,7 +41,7 @@ export function UserDetailPanel({
 
   const updateUser = useUpdateUser()
   const deleteUser = useDeleteUser()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   useEffect(() => {
     if (user) {
@@ -327,7 +327,7 @@ export function UserDetailPanel({
           </FormSection>
         </div>
       </SlideOverPanel>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </>
   )
 }

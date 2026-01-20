@@ -15,6 +15,7 @@ import { ShopItem, Purchase } from '../shop/shop.model'
 import { RefreshToken } from '../auth/refreshToken.model'
 import { ApiError } from '../../utils/ApiError'
 import { comparePassword } from '../../utils/password'
+import { awardXp } from '../../utils/xpTracking'
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -719,13 +720,12 @@ export async function completeLesson(userId: string, lessonId: string): Promise<
   }
 
   // Update student XP
-  await StudentProfile.findOneAndUpdate(
-    { userId: new Types.ObjectId(userId) },
-    {
-      $inc: { totalXp: lesson.xpReward },
-      lastActivityDate: new Date(),
-    }
-  )
+  await awardXp({
+    studentId: userId,
+    amount: lesson.xpReward,
+    source: `Completed Lesson: ${lesson.title}`,
+    sourceId: lessonId,
+  })
 
   return { xpEarned: lesson.xpReward }
 }
@@ -818,13 +818,12 @@ export async function submitExercise(
 
   // Award XP if passed and first time
   if (xpEarned > 0) {
-    await StudentProfile.findOneAndUpdate(
-      { userId: new Types.ObjectId(userId) },
-      {
-        $inc: { totalXp: xpEarned },
-        lastActivityDate: new Date(),
-      }
-    )
+    await awardXp({
+      studentId: userId,
+      amount: xpEarned,
+      source: `Completed Exercise: ${exercise.title}`,
+      sourceId: exerciseId,
+    })
   }
 
   return {
@@ -956,13 +955,12 @@ export async function submitQuiz(
 
   // Award XP if passed and first time
   if (xpEarned > 0) {
-    await StudentProfile.findOneAndUpdate(
-      { userId: new Types.ObjectId(userId) },
-      {
-        $inc: { totalXp: xpEarned },
-        lastActivityDate: new Date(),
-      }
-    )
+    await awardXp({
+      studentId: userId,
+      amount: xpEarned,
+      source: `Passed Quiz: ${quiz.title}`,
+      sourceId: quizId,
+    })
   }
 
   return {

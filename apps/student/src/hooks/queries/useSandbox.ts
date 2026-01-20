@@ -12,7 +12,7 @@ export function useSandboxProjects() {
 export function useSandboxProject(projectId: string | undefined) {
   return useQuery({
     queryKey: ['sandbox-project', projectId],
-    queryFn: () => sandboxApi.getSandboxProject(projectId!).then((res) => res.project),
+    queryFn: () => sandboxApi.getSandboxProject(projectId!),
     enabled: !!projectId,
   })
 }

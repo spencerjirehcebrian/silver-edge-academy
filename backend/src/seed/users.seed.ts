@@ -10,7 +10,7 @@ export interface SeededUsers {
   admin: Types.ObjectId
   teachers: Types.ObjectId[]
   students: Types.ObjectId[]
-  parent: Types.ObjectId
+  parents: Types.ObjectId[]
 }
 
 export async function seedUsers(): Promise<SeededUsers> {
@@ -91,30 +91,44 @@ export async function seedUsers(): Promise<SeededUsers> {
   }
   logger.info(`Created ${students.length} students with preferences`)
 
-  // Create parent
-  const parent = await User.create({
-    email: 'parent@example.com',
-    passwordHash: defaultPassword,
-    displayName: 'Parent User',
-    role: 'parent',
-    status: 'active',
-  })
-  await ParentProfile.create({
-    userId: parent._id,
-    childIds: [students[0], students[1]],
-  })
+  // Create 5 parents with different students
+  const parents: Types.ObjectId[] = []
+  const parentData = [
+    { email: 'parent1@silveredge.com', displayName: 'Jennifer Thompson', childIndices: [0, 1] },
+    { email: 'parent2@silveredge.com', displayName: 'Michael Chen', childIndices: [2, 3, 4] },
+    { email: 'parent3@silveredge.com', displayName: 'Maria Garcia', childIndices: [5, 6] },
+    { email: 'parent4@silveredge.com', displayName: 'David Wilson', childIndices: [7, 8] },
+    { email: 'parent5@silveredge.com', displayName: 'Aisha Patel', childIndices: [9] },
+  ]
 
-  // Link children to parent
-  await StudentProfile.updateMany(
-    { userId: { $in: [students[0], students[1]] } },
-    { $push: { parentIds: parent._id } }
-  )
-  logger.info('Created parent user')
+  for (const data of parentData) {
+    const parent = await User.create({
+      email: data.email,
+      passwordHash: defaultPassword,
+      displayName: data.displayName,
+      role: 'parent',
+      status: 'active',
+    })
+
+    const childIds = data.childIndices.map(i => students[i])
+    await ParentProfile.create({
+      userId: parent._id,
+      childIds,
+    })
+
+    await StudentProfile.updateMany(
+      { userId: { $in: childIds } },
+      { $push: { parentIds: parent._id } }
+    )
+
+    parents.push(parent._id)
+  }
+  logger.info(`Created ${parents.length} parents with children linked`)
 
   return {
     admin: admin._id,
     teachers,
     students,
-    parent: parent._id,
+    parents,
   }
 }

@@ -24,7 +24,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { DetailActionBar } from '@/components/ui/DetailActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useShopItem, useDeleteShopItem, useToggleShopItemStatus } from '@/hooks/queries/useShop'
 import { useSetPageMeta } from '@/contexts/PageMetaContext'
 import { formatDate } from '@/utils/formatters'
@@ -55,7 +55,7 @@ export default function ShopItemDetail() {
   const { data: item, isLoading } = useShopItem(id || '')
   const deleteItem = useDeleteShopItem()
   const toggleStatus = useToggleShopItemStatus()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   useSetPageMeta({ entityLabel: item?.name })
 
@@ -105,7 +105,7 @@ export default function ShopItemDetail() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-24">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">

@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
 import { FileCode, ChevronRight, BookOpen } from 'lucide-react'
-import { useUserCourses } from '@/hooks/queries/useUsers'
 import { formatDate } from '@/utils/formatters'
+import { StudentCourse } from '@/types/admin'
 
-interface StudentCoursesTabProps {
-  userId: string
+interface CoursesListProps {
+  courses: StudentCourse[] | undefined
+  isLoading?: boolean
+  emptyMessage?: string
 }
 
-export function StudentCoursesTab({ userId }: StudentCoursesTabProps) {
-  const { data: courses, isLoading } = useUserCourses(userId)
-
+export function CoursesList({ courses, isLoading, emptyMessage }: CoursesListProps) {
   if (isLoading) {
-    return <StudentCoursesTabSkeleton />
+    return <CoursesListSkeleton />
   }
 
   if (!courses || courses.length === 0) {
@@ -20,9 +20,9 @@ export function StudentCoursesTab({ userId }: StudentCoursesTabProps) {
         <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
           <BookOpen className="w-8 h-8 text-slate-400" />
         </div>
-        <h3 className="text-lg font-semibold text-slate-800 mb-1">No courses enrolled</h3>
+        <h3 className="text-lg font-semibold text-slate-800 mb-1">No courses available</h3>
         <p className="text-sm text-slate-500 text-center max-w-sm">
-          This student is not enrolled in any courses yet.
+          {emptyMessage || 'No courses assigned to this class yet.'}
         </p>
       </div>
     )
@@ -86,7 +86,7 @@ export function StudentCoursesTab({ userId }: StudentCoursesTabProps) {
   )
 }
 
-function StudentCoursesTabSkeleton() {
+function CoursesListSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (

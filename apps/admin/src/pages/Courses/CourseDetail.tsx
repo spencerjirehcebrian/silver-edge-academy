@@ -8,7 +8,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { DetailActionBar } from '@/components/ui/DetailActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useCourse, usePublishCourse, useDeleteCourse } from '@/hooks/queries/useCourses'
 import { formatDate } from '@/utils/formatters'
 import { SectionList } from './components'
@@ -19,7 +19,7 @@ export default function CourseDetail() {
   const { data: course, isLoading } = useCourse(id || '')
   const publishCourse = usePublishCourse()
   const deleteCourse = useDeleteCourse()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const handlePublish = async () => {
     if (!course) return
@@ -75,7 +75,7 @@ export default function CourseDetail() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-24">
       {/* Main Content */}
       <div className="lg:col-span-2 space-y-6">

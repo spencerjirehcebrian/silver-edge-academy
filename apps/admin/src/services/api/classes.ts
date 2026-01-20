@@ -11,7 +11,6 @@ export interface ClassListParams {
   limit?: number
   search?: string
   status?: ClassStatus
-  term?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
@@ -30,7 +29,6 @@ export interface CreateClassPayload {
   name: string
   description?: string
   color: string
-  term: string
   startDate?: string
   endDate?: string
   teacherId?: string
@@ -56,7 +54,6 @@ export async function getClasses(params: ClassListParams): Promise<ClassListResp
       limit: params.limit,
       search: params.search,
       status: params.status,
-      term: params.term,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     },

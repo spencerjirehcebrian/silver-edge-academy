@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DragHandle } from '@/components/ui/DragDrop'
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useDeleteLesson, useDuplicateLesson } from '@/hooks/queries/useCourses'
 import type { CourseLesson } from '@/services/api/courses'
 
@@ -15,7 +15,7 @@ interface LessonItemProps {
 }
 
 export function LessonItem({ courseId, sectionId, lesson }: LessonItemProps) {
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
   const deleteLesson = useDeleteLesson()
   const duplicateLesson = useDuplicateLesson()
 
@@ -76,7 +76,7 @@ export function LessonItem({ courseId, sectionId, lesson }: LessonItemProps) {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div
         ref={setNodeRef}
         style={style}

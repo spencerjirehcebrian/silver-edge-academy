@@ -27,20 +27,26 @@ export const parentColumns: ColumnDef<Parent>[] = [
     key: 'childIds',
     header: 'Children',
     sortable: true,
-    render: (p) => (
-      <div className="flex flex-wrap gap-1">
-        {p.childNames.slice(0, 2).map((name: string, i: number) => (
-          <span key={i} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">
-            {name}
-          </span>
-        ))}
-        {p.childNames.length > 2 && (
-          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">
-            +{p.childNames.length - 2}
-          </span>
-        )}
-      </div>
-    ),
+    render: (p) => {
+      const childNames = p.childNames || []
+      return (
+        <div className="flex flex-wrap gap-1">
+          {childNames.slice(0, 2).map((name: string, i: number) => (
+            <span key={i} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">
+              {name}
+            </span>
+          ))}
+          {childNames.length > 2 && (
+            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">
+              +{childNames.length - 2}
+            </span>
+          )}
+          {childNames.length === 0 && (
+            <span className="text-slate-400 text-xs">No children</span>
+          )}
+        </div>
+      )
+    },
   },
   {
     key: 'status',

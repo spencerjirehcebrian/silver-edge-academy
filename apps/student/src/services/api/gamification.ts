@@ -11,12 +11,8 @@ export type StudentBadge = Badge & {
   earnedAt?: string
 }
 
-export interface BadgesResponse {
-  earned: StudentBadge[]
-  locked: StudentBadge[]
-  totalEarned: number
-  totalAvailable: number
-}
+// Backend returns array of badges directly, not separated into earned/locked
+export type BadgesResponse = StudentBadge[]
 
 export interface XpHistoryItem {
   id: string
@@ -27,8 +23,15 @@ export interface XpHistoryItem {
   createdAt: string
 }
 
+// Backend returns paginated response with data and meta
 export interface XpHistoryResponse {
-  history: XpHistoryItem[]
+  data: XpHistoryItem[]
+  meta: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
 
 // ============================================================================
@@ -39,7 +42,7 @@ export interface XpHistoryResponse {
  * Get all badges with earned status
  */
 export async function getBadges(): Promise<BadgesResponse> {
-  return api.get<BadgesResponse>(STUDENT_ENDPOINTS.badges, { unwrapData: false })
+  return api.get<BadgesResponse>(STUDENT_ENDPOINTS.badges)
 }
 
 /**
@@ -50,8 +53,6 @@ export async function getXpHistory(params?: {
   limit?: number
   actionType?: string
 }): Promise<XpHistoryResponse> {
-  return api.get<XpHistoryResponse>(STUDENT_ENDPOINTS.xpHistory, {
-    params,
-    unwrapData: false,
-  })
+  // Use unwrapData: false to preserve pagination meta
+  return api.get<XpHistoryResponse>(STUDENT_ENDPOINTS.xpHistory, { params, unwrapData: false })
 }

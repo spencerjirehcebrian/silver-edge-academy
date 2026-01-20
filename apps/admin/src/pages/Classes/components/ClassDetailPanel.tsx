@@ -7,7 +7,7 @@ import { Select } from '@/components/ui/Select'
 import { Avatar } from '@/components/ui/Avatar'
 import { FormSection } from '@/components/forms/FormSection'
 import { FormField } from '@/components/forms/FormField'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useUpdateClass, useDeleteClass, useArchiveClass } from '@/hooks/queries/useClasses'
 import type { Class } from '@/services/api/classes'
 
@@ -47,7 +47,7 @@ export function ClassDetailPanel({
   const updateClass = useUpdateClass()
   const deleteClass = useDeleteClass()
   const archiveClass = useArchiveClass()
-  const { confirm, Dialog: ConfirmDialogEl } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   useEffect(() => {
     if (classItem) {
@@ -148,7 +148,6 @@ export function ClassDetailPanel({
         isOpen={isOpen}
         onClose={handleClose}
         title={mode === 'view' ? classItem.name : 'Edit Class'}
-        subtitle={mode === 'view' ? classItem.term : undefined}
         footer={
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
@@ -358,7 +357,7 @@ export function ClassDetailPanel({
           </div>
         )}
       </SlideOverPanel>
-      {ConfirmDialogEl}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </>
   )
 }

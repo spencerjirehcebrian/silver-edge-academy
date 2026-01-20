@@ -5,7 +5,7 @@ import { StatusBadge, RoleBadge } from '@/components/ui/Badge'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'
 import { DetailActionBar } from '@/components/ui/DetailActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useUser, useDeleteUser } from '@/hooks/queries/useUsers'
 import { formatDate } from '@/utils/formatters'
 import { useSetPageMeta } from '@/contexts/PageMetaContext'
@@ -21,7 +21,7 @@ function isStudentUser(user: User): user is Student {
   return user.role === 'student'
 }
 import { ParentCards, StudentCards } from './components/ParentStudentCards'
-import { StudentCoursesTab } from './components/StudentCoursesTab'
+import { StudentClassTab } from './components/StudentClassTab'
 import { StudentAchievementsTab } from './components/StudentAchievementsTab'
 
 export default function UserDetail() {
@@ -29,7 +29,7 @@ export default function UserDetail() {
   const navigate = useNavigate()
   const { data: user, isLoading } = useUser(id || '')
   const deleteUser = useDeleteUser()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
   const { addToast } = useToast()
 
   // Set page meta for breadcrumbs
@@ -119,7 +119,7 @@ export default function UserDetail() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-24">
       {/* Main Content */}
       <div className="lg:col-span-2 space-y-6">
@@ -130,7 +130,7 @@ export default function UserDetail() {
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
                 {isTeacher && <TabsTrigger value="classes">Classes</TabsTrigger>}
-                {isStudent && <TabsTrigger value="courses">Courses</TabsTrigger>}
+                {isStudent && <TabsTrigger value="courses">Class</TabsTrigger>}
                 {isStudent && <TabsTrigger value="achievements">Achievements</TabsTrigger>}
                 {isParent && <TabsTrigger value="children">Children</TabsTrigger>}
               </TabsList>
@@ -302,10 +302,10 @@ export default function UserDetail() {
               </TabsContent>
             )}
 
-            {/* Courses Tab (Students only) */}
+            {/* Class Tab (Students only) */}
             {isStudent && (
               <TabsContent value="courses" className="p-6">
-                <StudentCoursesTab userId={user.id} />
+                <StudentClassTab user={user} />
               </TabsContent>
             )}
 

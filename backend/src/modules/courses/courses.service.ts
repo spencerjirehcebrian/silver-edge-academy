@@ -96,8 +96,14 @@ export async function getCourseById(id: string) {
     throw ApiError.notFound('Course')
   }
 
-  // Get sections with lessons
-  const sections = await Section.find({ courseId: course._id }).sort({ orderIndex: 1 })
+  // Fetch creator, sections, and class count in parallel
+  const [creator, sections, classCount] = await Promise.all([
+    User.findById(course.createdBy).select('displayName'),
+    Section.find({ courseId: course._id }).sort({ orderIndex: 1 }),
+    Class.countDocuments({ courseIds: course._id }),
+  ])
+
+  const createdByName = creator?.displayName || 'Unknown'
   const sectionsWithLessons = await Promise.all(
     sections.map(async (section) => {
       const lessons = await Lesson.find({ sectionId: section._id }).sort({ orderIndex: 1 })
@@ -109,10 +115,9 @@ export async function getCourseById(id: string) {
     })
   )
 
-  const classCount = await Class.countDocuments({ courseIds: course._id })
-
   return {
     ...course.toJSON(),
+    createdByName,
     sections: sectionsWithLessons,
     sectionCount: sections.length,
     lessonCount: sectionsWithLessons.reduce((sum, s) => sum + s.lessonCount, 0),

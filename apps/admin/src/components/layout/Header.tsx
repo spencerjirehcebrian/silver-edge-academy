@@ -84,7 +84,6 @@ export function Header() {
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative"
             >
               <Bell className="w-5 h-5 text-slate-500" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
             {/* Notification Dropdown */}
@@ -97,29 +96,8 @@ export function Header() {
               <div className="p-3 border-b border-slate-100">
                 <h3 className="font-semibold text-slate-800">System Alerts</h3>
               </div>
-              <div className="max-h-64 overflow-y-auto">
-                <div className="p-3 hover:bg-slate-50 border-b border-slate-50">
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-amber-600 text-sm">!</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-700">Storage at 85% capacity</p>
-                      <p className="text-xs text-slate-400">2 hours ago</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3 hover:bg-slate-50">
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-emerald-600 text-sm">&#10003;</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-700">Backup completed successfully</p>
-                      <p className="text-xs text-slate-400">Yesterday</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="p-8 text-center">
+                <p className="text-sm text-slate-500">No alerts at this time</p>
               </div>
             </div>
           </div>

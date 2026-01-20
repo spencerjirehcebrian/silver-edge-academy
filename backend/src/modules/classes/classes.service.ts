@@ -4,19 +4,43 @@ import { LessonUnlock } from './lessonUnlock.model'
 import { User } from '../users/users.model'
 import { StudentProfile } from '../users/studentProfile.model'
 import { TeacherProfile } from '../users/teacherProfile.model'
-import { Course } from '../courses/courses.model'
+import { Course, type ICourse } from '../courses/courses.model'
 import { ApiError } from '../../utils/ApiError'
 import {
   parsePaginationParams,
   buildPaginationMeta,
   buildSortObject,
 } from '../../utils/pagination'
-import type { CreateClassInput, UpdateClassInput, ListClassesQuery } from './classes.schema'
+import type { CreateClassInput, UpdateClassInput, ListClassesQuery, ListStudentsQuery } from './classes.schema'
 import type { PaginationMeta } from '@silveredge/shared'
 
 export interface ClassListResult {
   classes: IClass[]
   meta: PaginationMeta
+}
+
+export interface StudentListResult {
+  students: any[]
+  meta: PaginationMeta
+}
+
+export interface ClassCourse {
+  id: string
+  name: string
+  category: string
+  progress: number
+}
+
+export function transformCourseToClassCourse(
+  course: ICourse,
+  progress: number
+): ClassCourse {
+  return {
+    id: course._id.toString(),
+    name: course.title,
+    category: course.language,
+    progress,
+  }
 }
 
 export async function listClasses(query: ListClassesQuery): Promise<ClassListResult> {
@@ -125,13 +149,36 @@ export async function deleteClass(id: string): Promise<void> {
   await classDoc.save()
 }
 
-export async function getClassStudents(classId: string) {
+export async function getClassStudents(classId: string, query: ListStudentsQuery): Promise<StudentListResult> {
   const classDoc = await Class.findById(classId)
   if (!classDoc) {
     throw ApiError.notFound('Class')
   }
 
-  return User.find({ _id: { $in: classDoc.studentIds } })
+  const { page, limit, skip, sortBy, sortOrder } = parsePaginationParams(query, 'displayName')
+
+  const filter: Record<string, unknown> = { _id: { $in: classDoc.studentIds } }
+
+  // Add search filter if provided
+  if (query.search) {
+    filter.$or = [
+      { displayName: { $regex: query.search, $options: 'i' } },
+      { email: { $regex: query.search, $options: 'i' } },
+    ]
+  }
+
+  const [students, total] = await Promise.all([
+    User.find(filter)
+      .sort(buildSortObject(sortBy, sortOrder))
+      .skip(skip)
+      .limit(limit),
+    User.countDocuments(filter),
+  ])
+
+  return {
+    students: students.map((s) => s.toJSON()),
+    meta: buildPaginationMeta(total, page, limit),
+  }
 }
 
 export async function addStudent(classId: string, studentId: string): Promise<void> {
@@ -265,4 +312,143 @@ export async function archiveClass(id: string): Promise<IClass> {
   classDoc.status = 'archived'
   await classDoc.save()
   return classDoc
+}
+
+export interface ClassStats {
+  attendanceRate: number
+  avgProgress: number
+  lastActivity: string
+}
+
+export async function computeClassStats(classDoc: IClass): Promise<ClassStats> {
+  // Default values
+  let attendanceRate = 0
+  let avgProgress = 0
+  let lastActivity = 'No activity'
+
+  // If no students, return defaults
+  if (classDoc.studentIds.length === 0) {
+    return { attendanceRate, avgProgress, lastActivity }
+  }
+
+  // Fetch student profiles to compute average progress
+  const studentProfiles = await StudentProfile.find({
+    userId: { $in: classDoc.studentIds },
+  }).select('xp lastActive')
+
+  if (studentProfiles.length > 0) {
+    // Calculate average progress based on XP (assuming level 1 = 0-100 XP, level 2 = 100-250 XP, etc.)
+    // This is a simplified calculation - can be enhanced based on your XP system
+    const totalXP = studentProfiles.reduce((sum, profile) => sum + (profile.xp || 0), 0)
+    const avgXP = totalXP / studentProfiles.length
+
+    // Convert XP to progress percentage (0-100%)
+    // Assuming 1000 XP = 100% for simplicity - adjust based on your system
+    avgProgress = Math.min(Math.round((avgXP / 1000) * 100), 100)
+
+    // Find most recent activity
+    const lastActiveDate = studentProfiles
+      .map((p) => p.lastActive)
+      .filter((date): date is Date => date !== null && date !== undefined)
+      .sort((a, b) => b.getTime() - a.getTime())[0]
+
+    if (lastActiveDate) {
+      lastActivity = lastActiveDate.toISOString()
+    }
+  }
+
+  // Calculate attendance rate from actual records (last 30 days)
+  try {
+    const { Attendance } = await import('../attendance/attendance.model')
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const attendanceRecords = await Attendance.find({
+      classId: classDoc._id,
+      date: { $gte: thirtyDaysAgo },
+    })
+
+    if (attendanceRecords.length > 0) {
+      const presentOrLate = attendanceRecords.filter(
+        (r) => r.status === 'present' || r.status === 'late'
+      ).length
+      attendanceRate = Math.round((presentOrLate / attendanceRecords.length) * 100)
+    }
+  } catch (error) {
+    // If attendance tracking is not available, keep default 0
+    attendanceRate = 0
+  }
+
+  return { attendanceRate, avgProgress, lastActivity }
+}
+
+export async function calculateCourseProgressForClass(
+  classId: string,
+  courseId: string
+): Promise<number> {
+  const classDoc = await Class.findById(classId)
+  if (!classDoc || classDoc.studentIds.length === 0) {
+    return 0
+  }
+
+  const { Section } = await import('../sections/sections.model')
+  const { Lesson } = await import('../lessons/lessons.model')
+  const { LessonProgress } = await import('../progress/lessonProgress.model')
+
+  // Get all lessons in this course
+  const sections = await Section.find({ courseId: new Types.ObjectId(courseId) })
+  const lessons = await Lesson.find({
+    sectionId: { $in: sections.map((s) => s._id) },
+  })
+
+  const totalLessons = lessons.length
+  if (totalLessons === 0) {
+    return 0
+  }
+
+  const lessonIds = lessons.map((l) => l._id)
+
+  // Use aggregation to count completed lessons per student
+  const progressByStudent = await LessonProgress.aggregate([
+    {
+      $match: {
+        studentId: { $in: classDoc.studentIds },
+        lessonId: { $in: lessonIds },
+        status: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: '$studentId',
+        completedCount: { $sum: 1 },
+      },
+    },
+  ])
+
+  const completedMap = new Map<string, number>()
+  progressByStudent.forEach((item) => {
+    completedMap.set(item._id.toString(), item.completedCount)
+  })
+
+  let totalProgress = 0
+  for (const studentId of classDoc.studentIds) {
+    const completedLessons = completedMap.get(studentId.toString()) || 0
+    const studentProgress = Math.round((completedLessons / totalLessons) * 100)
+    totalProgress += studentProgress
+  }
+
+  return Math.round(totalProgress / classDoc.studentIds.length)
+}
+
+export async function getClassCoursesWithProgress(classId: string): Promise<ClassCourse[]> {
+  const courses = await getClassCourses(classId)
+
+  const coursesWithProgress = await Promise.all(
+    courses.map(async (course) => {
+      const progress = await calculateCourseProgressForClass(classId, course._id.toString())
+      return transformCourseToClassCourse(course, progress)
+    })
+  )
+
+  return coursesWithProgress.filter((c) => c != null)
 }

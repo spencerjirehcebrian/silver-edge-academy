@@ -23,7 +23,7 @@ import {
 import { Card, CardHeader } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/Badge'
 import { DetailActionBar } from '@/components/ui/DetailActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useBadge, useDeleteBadge } from '@/hooks/queries/useBadges'
 import { formatDate } from '@/utils/formatters'
 import type { BadgeIcon, TriggerType } from '@/services/api/badges'
@@ -67,7 +67,7 @@ export default function BadgeDetail() {
   const navigate = useNavigate()
   const { data: badge, isLoading } = useBadge(id || '')
   const deleteBadge = useDeleteBadge()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const handleDelete = async () => {
     if (!badge) return
@@ -108,13 +108,13 @@ export default function BadgeDetail() {
     )
   }
 
-  const IconComponent = iconMap[badge.icon]
+  const IconComponent = iconMap[badge.icon] || Award
   const triggerLabel = triggerLabels[badge.triggerType]
   const hasTriggerValue = badge.triggerValue !== undefined && badge.triggerValue !== null
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-24">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">

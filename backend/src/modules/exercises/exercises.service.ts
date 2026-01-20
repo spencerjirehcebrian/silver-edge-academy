@@ -1,10 +1,10 @@
 import { Types } from 'mongoose'
 import { Exercise, type IExercise } from './exercises.model'
 import { ExerciseSubmission } from '../progress/exerciseSubmission.model'
-import { StudentProfile } from '../users/studentProfile.model'
 import { Lesson } from '../lessons/lessons.model'
 import { ApiError } from '../../utils/ApiError'
 import type { CreateExerciseInput, UpdateExerciseInput, SubmitExerciseInput } from './exercises.schema'
+import { awardXp } from '../../utils/xpTracking'
 
 export async function listExercises(lessonId: string): Promise<IExercise[]> {
   return Exercise.find({ lessonId: new Types.ObjectId(lessonId) }).sort({ orderIndex: 1 })
@@ -118,10 +118,12 @@ export async function submitExercise(
 
   // Update student profile if XP earned
   if (xpEarned > 0) {
-    await StudentProfile.findOneAndUpdate(
-      { userId: new Types.ObjectId(studentId) },
-      { $inc: { totalXp: xpEarned } }
-    )
+    await awardXp({
+      studentId,
+      amount: xpEarned,
+      source: `Completed Exercise: ${exercise.title}`,
+      sourceId: exerciseId,
+    })
   }
 
   return {

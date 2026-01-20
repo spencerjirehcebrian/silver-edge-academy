@@ -27,7 +27,7 @@ import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/Badge'
 import { FormSection } from '@/components/forms/FormSection'
 import { FormField } from '@/components/forms/FormField'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useUpdateBadge, useDeleteBadge } from '@/hooks/queries/useBadges'
 import { formatDate } from '@/utils/formatters'
 import {
@@ -124,7 +124,7 @@ export function BadgeDetailPanel({
 
   const updateBadge = useUpdateBadge()
   const deleteBadge = useDeleteBadge()
-  const { confirm, Dialog: ConfirmDialogEl } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const selectedTrigger = triggerOptions.find((t) => t.value === formData.triggerType)
   const gradients = badgeColorGradients[formData.color]
@@ -210,8 +210,8 @@ export function BadgeDetailPanel({
 
   if (!badge) return null
 
-  const BadgeIcon = iconMap[badge.icon]
-  const PreviewIcon = iconMap[formData.icon]
+  const BadgeIcon = iconMap[badge.icon] || Award
+  const PreviewIcon = iconMap[formData.icon] || Award
 
   return (
     <>
@@ -390,7 +390,7 @@ export function BadgeDetailPanel({
                 <p className="text-xs text-slate-500 mb-3">Icon</p>
                 <div className="grid grid-cols-8 gap-2 mb-4">
                   {iconList.map((icon) => {
-                    const Icon = iconMap[icon]
+                    const Icon = iconMap[icon] || Award
                     return (
                       <button
                         key={icon}
@@ -512,7 +512,7 @@ export function BadgeDetailPanel({
           </div>
         )}
       </SlideOverPanel>
-      {ConfirmDialogEl}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
     </>
   )
 }

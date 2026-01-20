@@ -120,7 +120,7 @@ export function StudentAchievementsTab({ userId }: StudentAchievementsTabProps) 
       {/* XP History */}
       <div>
         <h4 className="font-semibold text-slate-800 mb-3">Recent XP History</h4>
-        {achievements.xpHistory.length > 0 ? (
+        {achievements.xpHistory && achievements.xpHistory.length > 0 ? (
           <div className="space-y-2">
             {achievements.xpHistory.map((item, idx) => (
               <div

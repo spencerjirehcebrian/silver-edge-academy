@@ -54,6 +54,15 @@ export const addCourseSchema = z.object({
   courseId: z.string().min(1),
 })
 
+export const listStudentsQuerySchema = z.object({
+  page: z.coerce.number().optional(),
+  limit: z.coerce.number().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  search: z.string().optional(),
+})
+
 export type CreateClassInput = z.infer<typeof createClassSchema>
 export type UpdateClassInput = z.infer<typeof updateClassSchema>
 export type ListClassesQuery = z.infer<typeof listClassesQuerySchema>
+export type ListStudentsQuery = z.infer<typeof listStudentsQuerySchema>

@@ -27,13 +27,15 @@ export function ActivityChart() {
     )
   }
 
-  const maxValue = Math.max(...(activity?.map((d) => d.value) || [100]))
+  const maxValue = Math.max(
+    ...(activity?.map((d) => d.lessonsCompleted + d.exercisesCompleted + d.quizzesCompleted) || [100])
+  )
 
   return (
     <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 animate-fade-in delay-5">
       <div className="p-5 border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-slate-800">Active Users</h3>
+          <h3 className="font-semibold text-slate-800">Daily Activity</h3>
           <select className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 bg-white">
             <option>Last 7 days</option>
             <option>Last 30 days</option>
@@ -44,8 +46,10 @@ export function ActivityChart() {
       <div className="p-5">
         <div className="h-48 flex items-end justify-between gap-2">
           {activity?.map((item, index) => {
-            const isToday = item.day === 'Today'
-            const height = (item.value / maxValue) * 100
+            const value = item.lessonsCompleted + item.exercisesCompleted + item.quizzesCompleted
+            const height = maxValue > 0 ? (value / maxValue) * 100 : 0
+            const dayLabel = new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' })
+            const isToday = new Date(item.date).toDateString() === new Date().toDateString()
 
             return (
               <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -55,7 +59,7 @@ export function ActivityChart() {
                     isToday ? 'bg-accent-500 hover:bg-accent-600' : 'bg-accent-100 hover:bg-accent-200'
                   )}
                   style={{ height: `${height}%` }}
-                  title={`${item.value} active users`}
+                  title={`${value} activities\nLessons: ${item.lessonsCompleted}\nExercises: ${item.exercisesCompleted}\nQuizzes: ${item.quizzesCompleted}`}
                 />
                 <span
                   className={cn(
@@ -63,7 +67,7 @@ export function ActivityChart() {
                     isToday ? 'text-slate-500 font-medium' : 'text-slate-400'
                   )}
                 >
-                  {item.day}
+                  {dayLabel}
                 </span>
               </div>
             )

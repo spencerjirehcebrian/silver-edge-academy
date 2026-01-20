@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Coins,
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import {
   Table,
   TableHeader,
@@ -53,17 +53,37 @@ export default function ShopList() {
   const navigate = useNavigate()
   const { data: allItems, isLoading } = useShopItems()
   const deleteItem = useDeleteShopItem()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
 
   const [activeTab, setActiveTab] = useState('avatar_pack')
 
-  const avatarPacks = allItems?.filter((i) => i.category === 'avatar_pack') || []
-  const uiThemes = allItems?.filter((i) => i.category === 'ui_theme') || []
-  const editorThemes = allItems?.filter((i) => i.category === 'editor_theme') || []
-  const teacherRewards = allItems?.filter((i) => i.category === 'teacher_reward') || []
+  const avatarPacks = useMemo(
+    () => allItems?.filter((i) => i.category === 'avatar_pack') || [],
+    [allItems]
+  )
+  const uiThemes = useMemo(
+    () => allItems?.filter((i) => i.category === 'ui_theme') || [],
+    [allItems]
+  )
+  const editorThemes = useMemo(
+    () => allItems?.filter((i) => i.category === 'editor_theme') || [],
+    [allItems]
+  )
+  const teacherRewards = useMemo(
+    () => allItems?.filter((i) => i.category === 'teacher_reward') || [],
+    [allItems]
+  )
 
   // Selection for teacher rewards table
-  const rewardSelection = useSelection<ShopItem>(teacherRewards)
+  const rewardSelection = useSelection<ShopItem>([])
+
+  // Clear selection when teacher rewards data changes
+  useEffect(() => {
+    if (teacherRewards) {
+      rewardSelection.clearSelection()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teacherRewards])
 
   const handleItemClick = (item: ShopItem) => {
     navigate(`/admin/shop/${item.id}`)
@@ -94,7 +114,7 @@ export default function ShopList() {
 
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <Tabs defaultValue="avatar_pack" value={activeTab} onValueChange={setActiveTab}>
           <div className="border-b border-slate-200">

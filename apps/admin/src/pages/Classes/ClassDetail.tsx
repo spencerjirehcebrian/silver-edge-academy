@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Plus,
   Trophy,
@@ -17,7 +17,7 @@ import { StatusBadge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { DetailActionBar } from '@/components/ui/DetailActionBar'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
-import { useConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useConfirmDialog, ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import {
   Table,
   TableHeader,
@@ -42,6 +42,7 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useSelection } from '@/hooks/useSelection'
 import { formatDate } from '@/utils/formatters'
 import type { ClassStudent } from '@/services/api/classes'
+import { getAttendance, markAttendance, type AttendanceRecord } from '@/services/api/attendance'
 
 const CLASS_COLORS: Record<string, { bg: string; text: string }> = {
   '#6366f1': { bg: 'bg-accent-100', text: 'text-accent-600' },
@@ -63,9 +64,18 @@ export default function ClassDetail() {
   const { data: cls, isLoading } = useClass(id || '')
   const deleteClass = useDeleteClass()
   const removeStudentFromClass = useRemoveStudentFromClass()
-  const { confirm, Dialog: ConfirmDialog } = useConfirmDialog()
+  const { confirm, dialogProps } = useConfirmDialog()
   const { addToast } = useToast()
+  const queryClient = useQueryClient()
   const [showAddStudentModal, setShowAddStudentModal] = useState(false)
+
+  // Attendance tab state
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date()
+    return today.toISOString().split('T')[0]
+  })
+  const [attendanceRecords, setAttendanceRecords] = useState<Map<string, string>>(new Map())
+  const [isSavingAttendance, setIsSavingAttendance] = useState(false)
 
   // Roster tab state
   const [rosterState, setRosterState] = useState({
@@ -88,6 +98,32 @@ export default function ClassDetail() {
 
   const students = studentsData?.data || []
   const selection = useSelection<ClassStudent>(students)
+
+  // Fetch attendance for selected date
+  const { data: attendanceData, isLoading: isLoadingAttendance } = useQuery({
+    queryKey: ['attendance', id, selectedDate],
+    queryFn: async () => {
+      if (!id) return []
+      return getAttendance(id, {
+        startDate: selectedDate,
+        endDate: selectedDate,
+      })
+    },
+    enabled: !!id,
+  })
+
+  // Initialize attendance records from fetched data
+  useEffect(() => {
+    if (attendanceData) {
+      const records = new Map(
+        attendanceData.map((r: AttendanceRecord) => [r.studentId, r.status])
+      )
+      setAttendanceRecords(records)
+    } else {
+      // If no data, initialize with 'present' as default
+      setAttendanceRecords(new Map())
+    }
+  }, [attendanceData])
 
   // Sort helper functions
   const sorted = useCallback(
@@ -139,8 +175,29 @@ export default function ClassDetail() {
     }
   }
 
-  const handleSaveAttendance = () => {
-    addToast({ type: 'success', message: 'Attendance has been saved.' })
+  const handleSaveAttendance = async () => {
+    if (!id) return
+
+    setIsSavingAttendance(true)
+    try {
+      const records = Array.from(attendanceRecords.entries()).map(([studentId, status]) => ({
+        studentId,
+        status: status as 'present' | 'absent' | 'late' | 'excused',
+      }))
+
+      await markAttendance(id, {
+        records,
+        date: selectedDate,
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['class', id] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', id] })
+      addToast({ type: 'success', message: 'Attendance has been saved.' })
+    } catch (error) {
+      addToast({ type: 'error', message: 'Failed to save attendance. Please try again.' })
+    } finally {
+      setIsSavingAttendance(false)
+    }
   }
 
   const handleAddCourse = () => {
@@ -187,9 +244,14 @@ export default function ClassDetail() {
   // Students for progress/attendance tabs (not paginated)
   const allStudents = cls.students || []
 
+  // Defensive fallbacks for missing backend fields
+  const attendanceRate = cls.attendanceRate ?? 0
+  const avgProgress = cls.avgProgress ?? 0
+  const lastActivity = cls.lastActivity ?? 'No activity'
+
   return (
     <>
-      {ConfirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-24">
       {/* Main Content */}
       <div className="lg:col-span-2 space-y-6">
@@ -441,7 +503,8 @@ export default function ClassDetail() {
                 <h4 className="font-semibold text-slate-800">Attendance Records</h4>
                 <input
                   type="date"
-                  defaultValue="2026-01-14"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
                   className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
                 />
               </div>
@@ -449,84 +512,117 @@ export default function ClassDetail() {
               <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="text-center p-4 bg-emerald-50 rounded-lg">
                   <p className="text-2xl font-bold text-emerald-600">
-                    {Math.round((cls.studentCount * cls.attendanceRate) / 100)}
+                    {Array.from(attendanceRecords.values()).filter(s => s === 'present').length}
                   </p>
                   <p className="text-sm text-slate-600">Present</p>
                 </div>
                 <div className="text-center p-4 bg-red-50 rounded-lg">
                   <p className="text-2xl font-bold text-red-600">
-                    {Math.round((cls.studentCount * (100 - cls.attendanceRate)) / 100)}
+                    {Array.from(attendanceRecords.values()).filter(s => s === 'absent').length}
                   </p>
                   <p className="text-sm text-slate-600">Absent</p>
                 </div>
                 <div className="text-center p-4 bg-amber-50 rounded-lg">
-                  <p className="text-2xl font-bold text-amber-600">0</p>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {Array.from(attendanceRecords.values()).filter(s => s === 'late').length}
+                  </p>
                   <p className="text-sm text-slate-600">Late</p>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <p className="text-2xl font-bold text-slate-600">{cls.attendanceRate}%</p>
+                  <p className="text-2xl font-bold text-slate-600">{attendanceRate}%</p>
                   <p className="text-sm text-slate-600">Rate</p>
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
-                        Student
-                      </th>
-                      <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {allStudents.slice(0, 5).map((student, index) => (
-                      <tr key={student.id}>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-slate-800 text-sm">{student.displayName}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-2">
-                            <label className="flex items-center gap-1 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`attendance-${index}`}
-                                value="present"
-                                className="w-4 h-4 text-emerald-600"
-                                defaultChecked={student.progress >= 50}
-                              />
-                              <span className="text-xs text-slate-600">Present</span>
-                            </label>
-                            <label className="flex items-center gap-1 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`attendance-${index}`}
-                                value="absent"
-                                className="w-4 h-4 text-red-600"
-                                defaultChecked={student.progress < 50}
-                              />
-                              <span className="text-xs text-slate-600">Absent</span>
-                            </label>
-                            <label className="flex items-center gap-1 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`attendance-${index}`}
-                                value="late"
-                                className="w-4 h-4 text-amber-600"
-                              />
-                              <span className="text-xs text-slate-600">Late</span>
-                            </label>
-                          </div>
-                        </td>
+              {isLoadingAttendance ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-600"></div>
+                </div>
+              ) : allStudents.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">
+                  No students enrolled in this class
+                </div>
+              ) : (
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                          Student
+                        </th>
+                        <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                          Status
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {allStudents.map((student) => {
+                        const currentStatus = attendanceRecords.get(student.id) || 'present'
+                        return (
+                          <tr key={student.id}>
+                            <td className="px-4 py-3">
+                              <p className="font-medium text-slate-800 text-sm">{student.displayName}</p>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center gap-2">
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`attendance-${student.id}`}
+                                    value="present"
+                                    className="w-4 h-4 text-emerald-600"
+                                    checked={currentStatus === 'present'}
+                                    onChange={() => {
+                                      const newRecords = new Map(attendanceRecords)
+                                      newRecords.set(student.id, 'present')
+                                      setAttendanceRecords(newRecords)
+                                    }}
+                                  />
+                                  <span className="text-xs text-slate-600">Present</span>
+                                </label>
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`attendance-${student.id}`}
+                                    value="absent"
+                                    className="w-4 h-4 text-red-600"
+                                    checked={currentStatus === 'absent'}
+                                    onChange={() => {
+                                      const newRecords = new Map(attendanceRecords)
+                                      newRecords.set(student.id, 'absent')
+                                      setAttendanceRecords(newRecords)
+                                    }}
+                                  />
+                                  <span className="text-xs text-slate-600">Absent</span>
+                                </label>
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`attendance-${student.id}`}
+                                    value="late"
+                                    className="w-4 h-4 text-amber-600"
+                                    checked={currentStatus === 'late'}
+                                    onChange={() => {
+                                      const newRecords = new Map(attendanceRecords)
+                                      newRecords.set(student.id, 'late')
+                                      setAttendanceRecords(newRecords)
+                                    }}
+                                  />
+                                  <span className="text-xs text-slate-600">Late</span>
+                                </label>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <div className="mt-4 flex justify-end">
-                <Button onClick={handleSaveAttendance}>Save Attendance</Button>
+                <Button onClick={handleSaveAttendance} disabled={isSavingAttendance || allStudents.length === 0}>
+                  {isSavingAttendance ? 'Saving...' : 'Save Attendance'}
+                </Button>
               </div>
             </TabsContent>
 
@@ -641,15 +737,15 @@ export default function ClassDetail() {
             <div className="text-center p-3 bg-slate-50 rounded-lg">
               <p
                 className={`text-xl font-bold ${
-                  cls.avgProgress >= 80 ? 'text-emerald-600' : 'text-slate-800'
+                  avgProgress >= 80 ? 'text-emerald-600' : 'text-slate-800'
                 }`}
               >
-                {cls.avgProgress}%
+                {avgProgress}%
               </p>
               <p className="text-xs text-slate-500">Avg Progress</p>
             </div>
             <div className="text-center p-3 bg-slate-50 rounded-lg">
-              <p className="text-xl font-bold text-slate-800">{cls.attendanceRate}%</p>
+              <p className="text-xl font-bold text-slate-800">{attendanceRate}%</p>
               <p className="text-xs text-slate-500">Attendance</p>
             </div>
           </div>
@@ -680,16 +776,12 @@ export default function ClassDetail() {
           <CardHeader title="Details" />
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Term</span>
-              <span className="text-slate-700">{cls.term}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">Created</span>
               <span className="text-slate-700">{formatDate(cls.createdAt)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">Last Activity</span>
-              <span className="text-slate-700">{cls.lastActivity}</span>
+              <span className="text-slate-700">{lastActivity}</span>
             </div>
           </div>
         </Card>

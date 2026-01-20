@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { sendSuccess, sendPaginated, sendCreated, sendNoContent } from '../../utils/ApiResponse'
 import * as classesService from './classes.service'
-import type { CreateClassInput, UpdateClassInput, ListClassesQuery } from './classes.schema'
+import type { CreateClassInput, UpdateClassInput, ListClassesQuery, ListStudentsQuery } from './classes.schema'
 import type { AuthenticatedRequest } from '../../middleware/auth'
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
@@ -21,10 +21,19 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   const classDoc = await classesService.getClassById(req.params.id)
+  const [stats, courses] = await Promise.all([
+    classesService.computeClassStats(classDoc),
+    classesService.getClassCoursesWithProgress(req.params.id),
+  ])
+
   sendSuccess(res, {
     ...classDoc.toJSON(),
     studentCount: classDoc.studentIds.length,
     courseCount: classDoc.courseIds.length,
+    attendanceRate: stats.attendanceRate,
+    avgProgress: stats.avgProgress,
+    lastActivity: stats.lastActivity,
+    courses,
   })
 })
 
@@ -46,8 +55,9 @@ export const remove = asyncHandler(async (req: Request, res: Response) => {
 })
 
 export const getStudents = asyncHandler(async (req: Request, res: Response) => {
-  const students = await classesService.getClassStudents(req.params.id)
-  sendSuccess(res, students.map((s) => s.toJSON()))
+  const query = req.query as unknown as ListStudentsQuery
+  const result = await classesService.getClassStudents(req.params.id, query)
+  sendPaginated(res, result.students, result.meta)
 })
 
 export const addStudent = asyncHandler(async (req: Request, res: Response) => {

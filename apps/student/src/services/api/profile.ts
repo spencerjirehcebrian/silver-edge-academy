@@ -42,7 +42,7 @@ export interface NotificationsResponse {
  * Get student profile
  */
 export async function getProfile(): Promise<ProfileResponse> {
-  return api.get<ProfileResponse>(STUDENT_ENDPOINTS.profile, { unwrapData: false })
+  return api.get<ProfileResponse>(STUDENT_ENDPOINTS.profile)
 }
 
 /**
@@ -72,7 +72,6 @@ export async function getNotifications(params?: {
           read: params.read !== undefined ? String(params.read) : undefined,
         }
       : undefined,
-    unwrapData: false,
   })
 }
 

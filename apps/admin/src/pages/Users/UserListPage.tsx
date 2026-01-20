@@ -6,6 +6,7 @@ import { SearchInput } from '@/components/ui/SearchInput'
 import { Select } from '@/components/ui/Select'
 import { BulkActionBar } from '@/components/ui/BulkActionBar'
 import { DataTable, type ColumnDef } from '@/components/ui/DataTable'
+import { ConfirmDialog, type ConfirmDialogProps } from '@/components/ui/ConfirmDialog'
 import type { UseSelectionReturn } from '@/hooks/useSelection'
 import type { BaseUser } from '@/services/api/users'
 
@@ -60,7 +61,7 @@ interface UserListPageProps<T extends BaseUser> {
   // Extra filters
   extraFilters?: FilterDef[]
   // Dialog
-  confirmDialog: React.ReactNode
+  dialogProps: ConfirmDialogProps | null
 }
 
 export function UserListPage<T extends BaseUser>({
@@ -90,11 +91,11 @@ export function UserListPage<T extends BaseUser>({
   emptyIcon,
   emptyDescription,
   extraFilters = [],
-  confirmDialog,
+  dialogProps,
 }: UserListPageProps<T>) {
   return (
     <>
-      {confirmDialog}
+      {dialogProps && <ConfirmDialog {...dialogProps} />}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 p-4">
           <div className="flex items-center gap-3">
